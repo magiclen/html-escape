@@ -1,0 +1,31 @@
+[package]
+name = "html-escape"
+version = "0.1.0"
+authors = ["Magic Len <len@magiclen.org>"]
+edition = "2018"
+repository = "https://github.com/magiclen/html-escape"
+homepage = "https://magiclen.org/html-escape"
+keywords = ["html", "escape", "unescape", "encode", "decode"]
+categories = ["no-std", "encoding"]
+description = ""
+readme = "README.md"
+license = "MIT"
+
+[badges.travis-ci]
+repository = "magiclen/html-escape"
+branch = "master"
+
+[dependencies]
+utf8-width = "0.1"
+
+[dev-dependencies]
+bencher = "0.1.5"
+
+[features]
+default = ["std"]
+std = []
+
+[[bench]]
+name = "bench"
+required-features = ["std"]
+harness = false
