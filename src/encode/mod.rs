@@ -13,10 +13,6 @@ use alloc::vec::Vec;
 use crate::functions::*;
 use crate::utf8_width;
 
-// lazy_static! {
-//     static ref RE_SCRIPT: Regex = Regex::new(r"(?i)</(script\s*)>");
-// }
-
 macro_rules! encode_impl {
     ($(#[$attr: meta])* $escape_macro:ident; $(#[$encode_attr: meta])* $encode_name: ident; $(#[$encode_to_string_attr: meta])* $encode_to_string_name: ident; $(#[$encode_to_vec_attr: meta])* $encode_to_vec_name: ident; $(#[$encode_to_writer_attr: meta])* $encode_to_writer_name: ident $(;)*) => {
         $(#[$encode_attr])*
@@ -51,7 +47,7 @@ macro_rules! encode_impl {
 
             let mut start = p;
 
-            for e in text_bytes[start..].iter().copied() {
+            for e in text_bytes[p..].iter().copied() {
                 $escape_macro!(vec e, v, text_bytes, start, p);
             }
 
@@ -543,24 +539,24 @@ pub fn encode_script<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
     v.extend_from_slice(&text_bytes[..(p - 7)]);
     v.push(b'\\');
-    v.extend_from_slice(&text_bytes[(p - 7)..=p]);
 
-    let mut start = p + 1;
-    let mut end = start;
+    let mut start = p - 7;
 
-    for e in text_bytes[start..].iter().copied() {
+    p += 1;
+
+    for e in text_bytes[p..].iter().copied() {
         parse_script!(e, step, {
-            v.extend_from_slice(&text_bytes[start..(end - 8)]);
-            start = end + 1;
+            v.extend_from_slice(&text_bytes[start..(p - 8)]);
+            start = p + 1;
             v.push(b'<');
             v.push(b'\\');
-            v.extend_from_slice(&text_bytes[(end - 7)..=end]);
+            v.extend_from_slice(&text_bytes[(p - 7)..=p]);
         });
 
-        end += 1;
+        p += 1;
     }
 
-    v.extend_from_slice(&text_bytes[start..end]);
+    v.extend_from_slice(&text_bytes[start..p]);
 
     Cow::from(unsafe { String::from_utf8_unchecked(v) })
 }
@@ -721,24 +717,24 @@ pub fn encode_style<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
     v.extend_from_slice(&text_bytes[..(p - 6)]);
     v.push(b'\\');
-    v.extend_from_slice(&text_bytes[(p - 6)..=p]);
 
-    let mut start = p + 1;
-    let mut end = start;
+    let mut start = p - 6;
 
-    for e in text_bytes[start..].iter().copied() {
+    p += 1;
+
+    for e in text_bytes[p..].iter().copied() {
         parse_style!(e, step, {
-            v.extend_from_slice(&text_bytes[start..(end - 7)]);
-            start = end + 1;
+            v.extend_from_slice(&text_bytes[start..(p - 7)]);
+            start = p + 1;
             v.push(b'<');
             v.push(b'\\');
-            v.extend_from_slice(&text_bytes[(end - 6)..=end]);
+            v.extend_from_slice(&text_bytes[(p - 6)..=p]);
         });
 
-        end += 1;
+        p += 1;
     }
 
-    v.extend_from_slice(&text_bytes[start..end]);
+    v.extend_from_slice(&text_bytes[start..p]);
 
     Cow::from(unsafe { String::from_utf8_unchecked(v) })
 }

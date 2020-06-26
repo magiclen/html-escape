@@ -72,3 +72,18 @@ pub(crate) fn write_html_entity_to_writer<W: Write>(
         _ => write_hex_to_writer(e, output),
     }
 }
+
+#[inline]
+pub(crate) fn write_char_to_vec(c: char, output: &mut Vec<u8>) {
+    let width = c.len_utf8();
+
+    output.reserve(width);
+
+    let current_length = output.len();
+
+    unsafe {
+        output.set_len(current_length + width);
+    }
+
+    c.encode_utf8(&mut output[current_length..]);
+}
