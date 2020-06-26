@@ -1,7 +1,3 @@
-/*!
-
-*/
-
 extern crate html_escape;
 
 #[macro_use]

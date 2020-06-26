@@ -60,6 +60,7 @@ fn encode_safe_to_string() {
     }
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn encode_safe_to_writer() {
     for (expect, actual) in ENCODE_SAFE_CASES.iter().copied() {
@@ -111,10 +112,10 @@ fn encode_unquoted_attribute_to_writer() {
 const ENCODE_SCRIPT_CASES: [(&str, &str); 4] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
-    (r"alert('<script><\/script>');", "alert('<script></script>');"),
+    (r"alert('<script><\/scrIpt >');", "alert('<script></scrIpt >');"),
     (
-        r"alert('<script><\/script>');alert('<script><\/script>');",
-        "alert('<script></script>');alert('<script></script>');",
+        r"alert('<script><\/script>');alert('<script><\/script >');",
+        "alert('<script></script>');alert('<script></script >');",
     ),
 ];
 
@@ -132,6 +133,7 @@ fn encode_script_to_string() {
     }
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn encode_script_to_writer() {
     for (expect, actual) in ENCODE_SCRIPT_CASES.iter().copied() {
@@ -145,10 +147,10 @@ fn encode_script_to_writer() {
 const ENCODE_STYLE_CASES: [(&str, &str); 4] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
-    (r"div::after { content: '<style><\/style>';}", "div::after { content: '<style></style>';}"),
+    (r"div::after { content: '<style><\/stYle >';}", "div::after { content: '<style></stYle >';}"),
     (
-        r"div::after { content: '<style><\/style>';} label::after { content: '<style><\/style>';}",
-        "div::after { content: '<style></style>';} label::after { content: '<style></style>';}",
+        r"div::after { content: '<style><\/style>';} label::after { content: '<style><\/style >';}",
+        "div::after { content: '<style></style>';} label::after { content: '<style></style >';}",
     ),
 ];
 
@@ -166,6 +168,7 @@ fn encode_style_to_string() {
     }
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn encode_style_to_writer() {
     for (expect, actual) in ENCODE_STYLE_CASES.iter().copied() {

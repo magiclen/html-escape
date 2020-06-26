@@ -87,3 +87,12 @@ pub(crate) fn write_char_to_vec(c: char, output: &mut Vec<u8>) {
 
     c.encode_utf8(&mut output[current_length..]);
 }
+
+#[cfg(feature = "std")]
+#[inline]
+pub(crate) fn write_char_to_writer<W: Write>(c: char, output: &mut W) -> Result<(), io::Error> {
+    let mut buffer = [0u8; 4];
+    let length = c.encode_utf8(&mut buffer).len();
+
+    output.write_all(&buffer[..length])
+}

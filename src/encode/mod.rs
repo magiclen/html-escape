@@ -3,12 +3,12 @@ mod escape_impl;
 
 use core::str::from_utf8_unchecked;
 
-#[cfg(feature = "std")]
-use std::io::{self, Write};
-
 use alloc::borrow::Cow;
 use alloc::string::String;
 use alloc::vec::Vec;
+
+#[cfg(feature = "std")]
+use std::io::{self, Write};
 
 use crate::functions::*;
 use crate::utf8_width;
@@ -18,6 +18,7 @@ macro_rules! encode_impl {
         $(#[$encode_attr])*
         ///
         $(#[$attr])*
+        #[inline]
         pub fn $encode_name<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
             let text = text.as_ref();
             let text_bytes = text.as_bytes();
@@ -43,15 +44,7 @@ macro_rules! encode_impl {
             v.extend_from_slice(&text_bytes[..p]);
             v.extend_from_slice(first);
 
-            p += 1;
-
-            let mut start = p;
-
-            for e in text_bytes[p..].iter().copied() {
-                $escape_macro!(vec e, v, text_bytes, start, p);
-            }
-
-            v.extend_from_slice(&text_bytes[start..p]);
+            $encode_to_vec_name(unsafe { text.get_unchecked((p + 1)..) }, &mut v);
 
             Cow::from(unsafe { String::from_utf8_unchecked(v) })
         }
@@ -89,10 +82,10 @@ macro_rules! encode_impl {
             &output[current_length..]
         }
 
+        #[cfg(feature = "std")]
         $(#[$encode_to_writer_attr])*
         ///
         $(#[$attr])*
-        #[cfg(feature = "std")]
         #[inline]
         pub fn $encode_to_writer_name<S: AsRef<str>, W: Write>(text: S, output: &mut W) -> Result<(), io::Error> {
             let text = text.as_ref();
@@ -309,29 +302,7 @@ pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
     write_html_entity_to_vec(e, &mut v);
 
-    p += 1;
-
-    let mut start = p;
-
-    loop {
-        if p == text_length {
-            break;
-        }
-
-        e = text_bytes[p];
-
-        let width = unsafe { utf8_width::get_width_assume_valid(e) };
-
-        if width == 1 && !is_alphanumeric(e) {
-            v.extend_from_slice(&text_bytes[start..p]);
-            start = p + 1;
-            write_html_entity_to_vec(e, &mut v);
-        }
-
-        p += width;
-    }
-
-    v.extend_from_slice(&text_bytes[start..p]);
+    encode_unquoted_attribute_to_vec(unsafe { text.get_unchecked((p + 1)..) }, &mut v);
 
     Cow::from(unsafe { String::from_utf8_unchecked(v) })
 }
@@ -398,6 +369,7 @@ pub fn encode_unquoted_attribute_to_vec<S: AsRef<str>>(text: S, output: &mut Vec
     &output[current_length..]
 }
 
+#[cfg(feature = "std")]
 /// Write text used in an unquoted attribute to a writer. Except for alphanumeric characters, escape all characters which are less than 128.
 ///
 /// The following characters are escaped to named entities:
@@ -408,7 +380,6 @@ pub fn encode_unquoted_attribute_to_vec<S: AsRef<str>>(text: S, output: &mut Vec
 /// * `"` => `&quot;`
 ///
 /// Other non-alphanumeric characters are escaped to `&#xHH;`.
-#[cfg(feature = "std")]
 pub fn encode_unquoted_attribute_to_writer<S: AsRef<str>, W: Write>(
     text: S,
     output: &mut W,
@@ -546,9 +517,8 @@ pub fn encode_script<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
     for e in text_bytes[p..].iter().copied() {
         parse_script!(e, step, {
-            v.extend_from_slice(&text_bytes[start..(p - 8)]);
+            v.extend_from_slice(&text_bytes[start..(p - 7)]);
             start = p + 1;
-            v.push(b'<');
             v.push(b'\\');
             v.extend_from_slice(&text_bytes[(p - 7)..=p]);
         });
@@ -584,9 +554,8 @@ pub fn encode_script_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u
 
     for e in text_bytes.iter().copied() {
         parse_script!(e, step, {
-            output.extend_from_slice(&text_bytes[start..(end - 8)]);
+            output.extend_from_slice(&text_bytes[start..(end - 7)]);
             start = end + 1;
-            output.push(b'<');
             output.push(b'\\');
             output.extend_from_slice(&text_bytes[(end - 7)..=end]);
         });
@@ -599,8 +568,8 @@ pub fn encode_script_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u
     &output[current_length..]
 }
 
-/// Write text used in the `<script>` element to a writer. Escape `</script>` to `<\/script>`.
 #[cfg(feature = "std")]
+/// Write text used in the `<script>` element to a writer. Escape `</script>` to `<\/script>`.
 pub fn encode_script_to_writer<S: AsRef<str>, W: Write>(
     text: S,
     output: &mut W,
@@ -615,9 +584,9 @@ pub fn encode_script_to_writer<S: AsRef<str>, W: Write>(
 
     for e in text_bytes.iter().copied() {
         parse_script!(e, step, {
-            output.write_all(&text_bytes[start..(end - 8)])?;
+            output.write_all(&text_bytes[start..(end - 7)])?;
             start = end + 1;
-            output.write_all(b"<\\")?;
+            output.write_all(b"\\")?;
             output.write_all(&text_bytes[(end - 7)..=end])?;
         });
 
@@ -724,9 +693,8 @@ pub fn encode_style<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
     for e in text_bytes[p..].iter().copied() {
         parse_style!(e, step, {
-            v.extend_from_slice(&text_bytes[start..(p - 7)]);
+            v.extend_from_slice(&text_bytes[start..(p - 6)]);
             start = p + 1;
-            v.push(b'<');
             v.push(b'\\');
             v.extend_from_slice(&text_bytes[(p - 6)..=p]);
         });
@@ -762,9 +730,8 @@ pub fn encode_style_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u8
 
     for e in text_bytes.iter().copied() {
         parse_style!(e, step, {
-            output.extend_from_slice(&text_bytes[start..(end - 7)]);
+            output.extend_from_slice(&text_bytes[start..(end - 6)]);
             start = end + 1;
-            output.push(b'<');
             output.push(b'\\');
             output.extend_from_slice(&text_bytes[(end - 6)..=end]);
         });
@@ -777,8 +744,8 @@ pub fn encode_style_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u8
     &output[current_length..]
 }
 
-/// Write text used in the `<style>` element to a writer. Escape `</style>` to `<\/style>`.
 #[cfg(feature = "std")]
+/// Write text used in the `<style>` element to a writer. Escape `</style>` to `<\/style>`.
 pub fn encode_style_to_writer<S: AsRef<str>, W: Write>(
     text: S,
     output: &mut W,
@@ -793,9 +760,9 @@ pub fn encode_style_to_writer<S: AsRef<str>, W: Write>(
 
     for e in text_bytes.iter().copied() {
         parse_style!(e, step, {
-            output.write_all(&text_bytes[start..(end - 7)])?;
+            output.write_all(&text_bytes[start..(end - 6)])?;
             start = end + 1;
-            output.write_all(b"<\\")?;
+            output.write_all(b"\\")?;
             output.write_all(&text_bytes[(end - 6)..=end])?;
         });
 
