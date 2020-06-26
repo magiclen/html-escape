@@ -1,5 +1,6 @@
 #[macro_use]
 mod escape_impl;
+mod javascript;
 
 use core::str::from_utf8_unchecked;
 
@@ -12,6 +13,8 @@ use std::io::{self, Write};
 
 use crate::functions::*;
 use crate::utf8_width;
+
+pub use javascript::*;
 
 macro_rules! encode_impl {
     ($(#[$attr: meta])* $escape_macro:ident; $(#[$encode_attr: meta])* $encode_name: ident; $(#[$encode_to_string_attr: meta])* $encode_to_string_name: ident; $(#[$encode_to_vec_attr: meta])* $encode_to_vec_name: ident; $(#[$encode_to_writer_attr: meta])* $encode_to_writer_name: ident $(;)*) => {
@@ -506,7 +509,7 @@ pub fn encode_script<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
         p += 1;
     }
 
-    let mut v = Vec::with_capacity(text_length);
+    let mut v = Vec::with_capacity(text_length + 1);
 
     v.extend_from_slice(&text_bytes[..(p - 7)]);
     v.push(b'\\');
@@ -518,9 +521,8 @@ pub fn encode_script<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
     for e in text_bytes[p..].iter().copied() {
         parse_script!(e, step, {
             v.extend_from_slice(&text_bytes[start..(p - 7)]);
-            start = p + 1;
+            start = p - 7;
             v.push(b'\\');
-            v.extend_from_slice(&text_bytes[(p - 7)..=p]);
         });
 
         p += 1;
@@ -555,9 +557,8 @@ pub fn encode_script_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u
     for e in text_bytes.iter().copied() {
         parse_script!(e, step, {
             output.extend_from_slice(&text_bytes[start..(end - 7)]);
-            start = end + 1;
+            start = end - 7;
             output.push(b'\\');
-            output.extend_from_slice(&text_bytes[(end - 7)..=end]);
         });
 
         end += 1;
@@ -585,9 +586,8 @@ pub fn encode_script_to_writer<S: AsRef<str>, W: Write>(
     for e in text_bytes.iter().copied() {
         parse_script!(e, step, {
             output.write_all(&text_bytes[start..(end - 7)])?;
-            start = end + 1;
+            start = end - 7;
             output.write_all(b"\\")?;
-            output.write_all(&text_bytes[(end - 7)..=end])?;
         });
 
         end += 1;
@@ -682,7 +682,7 @@ pub fn encode_style<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
         p += 1;
     }
 
-    let mut v = Vec::with_capacity(text_length);
+    let mut v = Vec::with_capacity(text_length + 1);
 
     v.extend_from_slice(&text_bytes[..(p - 6)]);
     v.push(b'\\');
@@ -694,9 +694,8 @@ pub fn encode_style<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
     for e in text_bytes[p..].iter().copied() {
         parse_style!(e, step, {
             v.extend_from_slice(&text_bytes[start..(p - 6)]);
-            start = p + 1;
+            start = p - 6;
             v.push(b'\\');
-            v.extend_from_slice(&text_bytes[(p - 6)..=p]);
         });
 
         p += 1;
@@ -731,9 +730,8 @@ pub fn encode_style_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u8
     for e in text_bytes.iter().copied() {
         parse_style!(e, step, {
             output.extend_from_slice(&text_bytes[start..(end - 6)]);
-            start = end + 1;
+            start = end - 6;
             output.push(b'\\');
-            output.extend_from_slice(&text_bytes[(end - 6)..=end]);
         });
 
         end += 1;
@@ -761,9 +759,8 @@ pub fn encode_style_to_writer<S: AsRef<str>, W: Write>(
     for e in text_bytes.iter().copied() {
         parse_style!(e, step, {
             output.write_all(&text_bytes[start..(end - 6)])?;
-            start = end + 1;
+            start = end - 6;
             output.write_all(b"\\")?;
-            output.write_all(&text_bytes[(end - 6)..=end])?;
         });
 
         end += 1;

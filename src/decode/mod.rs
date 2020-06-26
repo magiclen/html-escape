@@ -165,9 +165,6 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                     b';' => {
                         // incorrect
                         step = 0;
-
-                        v.extend_from_slice(&text_bytes[start..=p]);
-                        start = p + 1;
                     }
                     _ => {
                         step = 2;
@@ -198,9 +195,6 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                     b';' => {
                         // incorrect
                         step = 0;
-
-                        v.extend_from_slice(&text_bytes[start..=p]);
-                        start = p + 1;
                     }
                     _ => step = 4,
                 }
@@ -226,9 +220,6 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                     b';' => {
                         // incorrect
                         step = 0;
-
-                        v.extend_from_slice(&text_bytes[start..=p]);
-                        start = p + 1;
                     }
                     _ => step = 6,
                 }
@@ -297,9 +288,6 @@ pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>)
                     b';' => {
                         // incorrect
                         step = 0;
-
-                        output.extend_from_slice(&text_bytes[start..=end]);
-                        start = end + 1;
                     }
                     _ => {
                         step = 2;
@@ -330,9 +318,6 @@ pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>)
                     b';' => {
                         // incorrect
                         step = 0;
-
-                        output.extend_from_slice(&text_bytes[start..=end]);
-                        start = end + 1;
                     }
                     _ => step = 4,
                 }
@@ -358,9 +343,6 @@ pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>)
                     b';' => {
                         // incorrect
                         step = 0;
-
-                        output.extend_from_slice(&text_bytes[start..=end]);
-                        start = end + 1;
                     }
                     _ => step = 6,
                 }
@@ -423,9 +405,6 @@ pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write>(
                     b';' => {
                         // incorrect
                         step = 0;
-
-                        output.write_all(&text_bytes[start..=end])?;
-                        start = end + 1;
                     }
                     _ => {
                         step = 2;
@@ -456,9 +435,6 @@ pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write>(
                     b';' => {
                         // incorrect
                         step = 0;
-
-                        output.write_all(&text_bytes[start..=end])?;
-                        start = end + 1;
                     }
                     _ => step = 4,
                 }
@@ -484,9 +460,6 @@ pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write>(
                     b';' => {
                         // incorrect
                         step = 0;
-
-                        output.write_all(&text_bytes[start..=end])?;
-                        start = end + 1;
                     }
                     _ => step = 6,
                 }
@@ -625,8 +598,7 @@ pub fn decode_script<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
     for e in text_bytes[p..].iter().copied() {
         parse_script!(e, step, {
             v.extend_from_slice(&text_bytes[start..(p - 8)]);
-            start = p + 1;
-            v.extend_from_slice(&text_bytes[(p - 7)..=p]);
+            start = p - 7;
         });
 
         p += 1;
@@ -661,8 +633,7 @@ pub fn decode_script_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u
     for e in text_bytes.iter().copied() {
         parse_script!(e, step, {
             output.extend_from_slice(&text_bytes[start..(end - 8)]);
-            start = end + 1;
-            output.extend_from_slice(&text_bytes[(end - 7)..=end]);
+            start = end - 7;
         });
 
         end += 1;
@@ -690,8 +661,7 @@ pub fn decode_script_to_writer<S: AsRef<str>, W: Write>(
     for e in text_bytes.iter().copied() {
         parse_script!(e, step, {
             output.write_all(&text_bytes[start..(end - 8)])?;
-            start = end + 1;
-            output.write_all(&text_bytes[(end - 7)..=end])?;
+            start = end - 7;
         });
 
         end += 1;
@@ -803,8 +773,7 @@ pub fn decode_style<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
     for e in text_bytes[p..].iter().copied() {
         parse_style!(e, step, {
             v.extend_from_slice(&text_bytes[start..(p - 7)]);
-            start = p + 1;
-            v.extend_from_slice(&text_bytes[(p - 6)..=p]);
+            start = p - 6;
         });
 
         p += 1;
@@ -839,8 +808,7 @@ pub fn decode_style_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u8
     for e in text_bytes.iter().copied() {
         parse_style!(e, step, {
             output.extend_from_slice(&text_bytes[start..(end - 7)]);
-            start = end + 1;
-            output.extend_from_slice(&text_bytes[(end - 6)..=end]);
+            start = end - 6;
         });
 
         end += 1;
@@ -868,8 +836,7 @@ pub fn decode_style_to_writer<S: AsRef<str>, W: Write>(
     for e in text_bytes.iter().copied() {
         parse_style!(e, step, {
             output.write_all(&text_bytes[start..(end - 7)])?;
-            start = end + 1;
-            output.write_all(&text_bytes[(end - 6)..=end])?;
+            start = end - 6;
         });
 
         end += 1;

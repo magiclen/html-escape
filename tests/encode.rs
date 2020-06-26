@@ -178,3 +178,38 @@ fn encode_style_to_writer() {
         assert_eq!(expect.as_bytes(), v.as_slice());
     }
 }
+
+const ENCODE_JAVASCRIPT_SINGLE_QUOTED_CASES: [(&str, &str); 4] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    (r"alert(\'<script><\/scrIpt >\');", "alert('<script></scrIpt >');"),
+    (
+        "alert(\"<script><\\/script>\");alert(\\'<script><\\/script >\\');",
+        "alert(\"<script></script>\");alert('<script></script >');",
+    ),
+];
+
+#[test]
+fn encode_javascript_single_quoted_text() {
+    for (expect, actual) in ENCODE_JAVASCRIPT_SINGLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_javascript_single_quoted_text(actual));
+    }
+}
+
+#[test]
+fn encode_javascript_single_quoted_text_to_string() {
+    for (expect, actual) in ENCODE_JAVASCRIPT_SINGLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_javascript_single_quoted_text_to_string(actual, &mut String::new()));
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn encode_javascript_single_quoted_text_to_writer() {
+    for (expect, actual) in ENCODE_JAVASCRIPT_SINGLE_QUOTED_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::encode_javascript_single_quoted_text_to_writer(actual, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
