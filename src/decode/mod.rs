@@ -56,7 +56,7 @@ pub fn decode<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
                     v.extend_from_slice(&text_bytes[..ep]);
 
-                    let name = &text[(ep + 1)..p];
+                    let name = &text_bytes[(ep + 1)..p];
 
                     match NAMED_ENTITIES.binary_search_by(|(t_name, _)| t_name.cmp(&name)) {
                         Ok(index) => {
@@ -86,7 +86,7 @@ pub fn decode<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
                     v.extend_from_slice(&text_bytes[..ep]);
 
-                    let number = &text[(ep + 2)..p];
+                    let number = unsafe { text.get_unchecked((ep + 2)..p) };
 
                     match number.parse::<u32>() {
                         Ok(number) => {
@@ -118,7 +118,7 @@ pub fn decode<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
                     v.extend_from_slice(&text_bytes[..ep]);
 
-                    let hex = &text[(ep + 3)..p];
+                    let hex = unsafe { text.get_unchecked((ep + 3)..p) };
 
                     match u32::from_str_radix(hex, 16) {
                         Ok(number) => {
@@ -174,7 +174,7 @@ pub fn decode<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                     // named
                     step = 0;
 
-                    let name = &text[(ep + 1)..p];
+                    let name = &text_bytes[(ep + 1)..p];
 
                     if let Ok(index) =
                         NAMED_ENTITIES.binary_search_by(|(t_name, _)| t_name.cmp(&name))
@@ -205,7 +205,7 @@ pub fn decode<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                     // numeric
                     step = 0;
 
-                    let number = &text[(ep + 2)..p];
+                    let number = unsafe { text.get_unchecked((ep + 2)..p) };
 
                     if let Ok(number) = number.parse::<u32>() {
                         if let Ok(c) = char::try_from(number) {
@@ -231,7 +231,9 @@ pub fn decode<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
             6 => {
                 if e == b';' {
                     // hex
-                    let hex = &text[(ep + 3)..p];
+                    step = 0;
+
+                    let hex = unsafe { text.get_unchecked((ep + 3)..p) };
 
                     if let Ok(number) = u32::from_str_radix(hex, 16) {
                         if let Ok(c) = char::try_from(number) {
