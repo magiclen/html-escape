@@ -7,38 +7,29 @@ macro_rules! escape_impl {
                     _ => (),
                 }
             };
-            ($dollar e:expr, $dollar r:ident) => {
+            (vec $dollar e:expr, $dollar v:ident, $dollar b:ident, $dollar start:ident, $dollar end:ident) => {
                 match $dollar e {
                     $($l => {
-                        $dollar r = $r;
-                        break;
+                        $dollar v.extend_from_slice(&$dollar b[$dollar start..$dollar end]);
+                        $dollar start = $dollar end + 1;
+                        $dollar v.extend_from_slice($r);
                     })+
                     _ => (),
                 }
+
+                $dollar end += 1;
             };
-            (vec $dollar e:expr, $dollar v:ident) => {
+            (writer $dollar e:expr, $dollar w:ident, $dollar b:ident, $dollar start:ident, $dollar end:ident) => {
                 match $dollar e {
-                    $($l => $dollar v.extend_from_slice($r),)+
-                    _ => $dollar v.push($dollar e),
+                    $($l => {
+                        $dollar w.write_all(&$dollar b[$dollar start..$dollar end])?;
+                        $dollar start = $dollar end + 1;
+                        $dollar w.write_all($r)?;
+                    })+
+                    _ => (),
                 }
-            };
-            (vec $dollar e:expr, $dollar v:ident, $dollar r:block) => {
-                match $dollar e {
-                    $($l => $dollar v.extend_from_slice($r),)+
-                    _ => $dollar r,
-                }
-            };
-            (writer $dollar e:expr, $dollar w:ident) => {
-                match $dollar e {
-                    $($l => $dollar w.write_all($r)?,)+
-                    _ => $dollar w.write_all(&[$dollar e])?,
-                }
-            };
-            (writer $dollar e:expr, $dollar w:ident, $dollar r:block) => {
-                match $dollar e {
-                    $($l => $dollar w.write_all($r)?,)+
-                    _ => $dollar r,
-                }
+
+                $dollar end += 1;
             };
         }
     };

@@ -58,6 +58,7 @@ pub(crate) fn write_html_entity_to_vec(e: u8, output: &mut Vec<u8>) {
     }
 }
 
+#[cfg(feature = "std")]
 #[inline]
 pub(crate) fn write_html_entity_to_writer<W: Write>(
     e: u8,

@@ -107,3 +107,71 @@ fn encode_unquoted_attribute_to_writer() {
         assert_eq!(expect.as_bytes(), v.as_slice());
     }
 }
+
+const ENCODE_SCRIPT: [(&str, &str); 4] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    (r"alert('<script><\/script>');", "alert('<script></script>');"),
+    (
+        r"alert('<script><\/script>');alert('<script><\/script>');",
+        "alert('<script></script>');alert('<script></script>');",
+    ),
+];
+
+#[test]
+fn encode_script() {
+    for (expect, actual) in ENCODE_SCRIPT.iter().copied() {
+        assert_eq!(expect, html_escape::encode_script(actual));
+    }
+}
+
+#[test]
+fn encode_script_to_string() {
+    for (expect, actual) in ENCODE_SCRIPT.iter().copied() {
+        assert_eq!(expect, html_escape::encode_script_to_string(actual, &mut String::new()));
+    }
+}
+
+#[test]
+fn encode_script_to_writer() {
+    for (expect, actual) in ENCODE_SCRIPT.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::encode_script_to_writer(actual, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
+const ENCODE_STYLE: [(&str, &str); 4] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    (r"div::after { content: '<style><\/style>';}", "div::after { content: '<style></style>';}"),
+    (
+        r"div::after { content: '<style><\/style>';} label::after { content: '<style><\/style>';}",
+        "div::after { content: '<style></style>';} label::after { content: '<style></style>';}",
+    ),
+];
+
+#[test]
+fn encode_style() {
+    for (expect, actual) in ENCODE_STYLE.iter().copied() {
+        assert_eq!(expect, html_escape::encode_style(actual));
+    }
+}
+
+#[test]
+fn encode_style_to_string() {
+    for (expect, actual) in ENCODE_STYLE.iter().copied() {
+        assert_eq!(expect, html_escape::encode_style_to_string(actual, &mut String::new()));
+    }
+}
+
+#[test]
+fn encode_style_to_writer() {
+    for (expect, actual) in ENCODE_STYLE.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::encode_style_to_writer(actual, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}

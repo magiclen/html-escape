@@ -1,5 +1,5 @@
 /*!
-This benchmark is referred to https://github.com/veddan/rust-htmlescape/blob/master/benches/bench.rs.
+
 */
 
 extern crate html_escape;
@@ -98,6 +98,9 @@ benchmark_impl!(
 
 benchmark_impl!(safe, encode_safe, encode_safe_to_string, encode_safe_to_writer);
 
+benchmark_impl!(script, encode_script, encode_script_to_string, encode_script_to_writer);
+benchmark_impl!(style, encode_style, encode_style_to_string, encode_style_to_writer);
+
 benchmark_main!(
     text_minimal,
     text,
@@ -105,5 +108,7 @@ benchmark_main!(
     single_quoted_attribute,
     quoted_attribute,
     unquoted_attribute,
-    safe
+    safe,
+    script,
+    style,
 );
