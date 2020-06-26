@@ -24,6 +24,17 @@ fn encode_text_minimal_to_string() {
     }
 }
 
+#[cfg(feature = "std")]
+#[test]
+fn encode_text_minimal_to_writer() {
+    for (expect, actual) in ENCODE_TEXT_MINIMAL_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::encode_text_minimal_to_writer(actual, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
 const ENCODE_SAFE_CASES: [(&str, &str); 7] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
@@ -41,10 +52,21 @@ fn encode_safe() {
     }
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn encode_safe_to_string() {
     for (expect, actual) in ENCODE_SAFE_CASES.iter().copied() {
         assert_eq!(expect, html_escape::encode_safe_to_string(actual, &mut String::new()));
+    }
+}
+
+#[test]
+fn encode_safe_to_writer() {
+    for (expect, actual) in ENCODE_SAFE_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::encode_safe_to_writer(actual, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
     }
 }
 
@@ -62,5 +84,26 @@ const ENCODE_UNQUOTED_ATTRIBUTE_CASES: [(&str, &str); 7] = [
 fn encode_unquoted_attribute() {
     for (expect, actual) in ENCODE_UNQUOTED_ATTRIBUTE_CASES.iter().copied() {
         assert_eq!(expect, html_escape::encode_unquoted_attribute(actual));
+    }
+}
+
+#[test]
+fn encode_unquoted_attribute_to_string() {
+    for (expect, actual) in ENCODE_UNQUOTED_ATTRIBUTE_CASES.iter().copied() {
+        assert_eq!(
+            expect,
+            html_escape::encode_unquoted_attribute_to_string(actual, &mut String::new())
+        );
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn encode_unquoted_attribute_to_writer() {
+    for (expect, actual) in ENCODE_UNQUOTED_ATTRIBUTE_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::encode_unquoted_attribute_to_writer(actual, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
     }
 }

@@ -265,7 +265,7 @@ encode_impl! {
 
 // TODO ----------
 
-/// Except for alphanumeric characters, escape all characters which are less than 128 to HTML entities.
+/// Encode text used in an unquoted attribute. Except for alphanumeric characters, escape all characters which are less than 128.
 ///
 /// The following characters are escaped to named entities:
 ///
@@ -273,6 +273,8 @@ encode_impl! {
 /// * `<` => `&lt;`
 /// * `>` => `&gt;`
 /// * `"` => `&quot;`
+///
+/// Other non-alphanumeric characters are escaped to `&#xHH;`.
 pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
     let text = text.as_ref();
     let text_bytes = text.as_bytes();
@@ -329,4 +331,114 @@ pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
     }
 
     Cow::from(unsafe { String::from_utf8_unchecked(v) })
+}
+
+/// Write text used in an unquoted attribute to a mutable `String` reference and return the encoded data slice. Except for alphanumeric characters, escape all characters which are less than 128.
+///
+/// The following characters are escaped to named entities:
+///
+/// * `&` => `&amp;`
+/// * `<` => `&lt;`
+/// * `>` => `&gt;`
+/// * `"` => `&quot;`
+///
+/// Other non-alphanumeric characters are escaped to `&#xHH;`.
+#[inline]
+pub fn encode_unquoted_attribute_to_string<S: AsRef<str>>(text: S, output: &mut String) -> &str {
+    unsafe { from_utf8_unchecked(encode_unquoted_attribute_to_vec(text, output.as_mut_vec())) }
+}
+
+/// Write text used in an unquoted attribute to a mutable `Vec<u8>` reference and return the encoded data slice. Except for alphanumeric characters, escape all characters which are less than 128.
+///
+/// The following characters are escaped to named entities:
+///
+/// * `&` => `&amp;`
+/// * `<` => `&lt;`
+/// * `>` => `&gt;`
+/// * `"` => `&quot;`
+///
+/// Other non-alphanumeric characters are escaped to `&#xHH;`.
+pub fn encode_unquoted_attribute_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u8] {
+    let text = text.as_ref();
+    let text_bytes = text.as_bytes();
+    let text_length = text_bytes.len();
+
+    output.reserve(text_length);
+
+    let current_length = output.len();
+
+    let mut p = 0;
+    let mut e;
+
+    loop {
+        if p == text_length {
+            break;
+        }
+
+        e = text_bytes[p];
+
+        let width = unsafe { utf8_width::get_width_assume_valid(e) };
+
+        if width == 1 {
+            if is_alphanumeric(e) {
+                output.extend_from_slice(&[e]);
+            } else {
+                write_html_entity_to_vec(e, output);
+            }
+        } else {
+            output.extend_from_slice(&text_bytes[p..(p + width)]);
+        }
+
+        p += width;
+    }
+
+    &output[current_length..]
+}
+
+/// Write text used in an unquoted attribute to a writer. Except for alphanumeric characters, escape all characters which are less than 128.
+///
+/// The following characters are escaped to named entities:
+///
+/// * `&` => `&amp;`
+/// * `<` => `&lt;`
+/// * `>` => `&gt;`
+/// * `"` => `&quot;`
+///
+/// Other non-alphanumeric characters are escaped to `&#xHH;`.
+#[cfg(feature = "std")]
+pub fn encode_unquoted_attribute_to_writer<S: AsRef<str>, W: Write>(
+    text: S,
+    output: &mut W,
+) -> Result<(), io::Error> {
+    let text = text.as_ref();
+    let text_bytes = text.as_bytes();
+
+    let text_length = text_bytes.len();
+
+    let mut p = 0;
+    let mut e;
+
+    loop {
+        if p == text_length {
+            break;
+        }
+
+        e = text_bytes[p];
+
+        let width = unsafe { utf8_width::get_width_assume_valid(e) };
+
+        if width == 1 {
+            if is_alphanumeric(e) {
+                output.write_all(&[e])?;
+            } else {
+                write_html_entity_to_writer(e, output)?;
+            }
+        } else {
+            output.write_all(&text_bytes[p..(p + width)])?;
+        }
+
+        p += width;
+    }
+
+    Ok(())
 }

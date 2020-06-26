@@ -26,6 +26,6 @@ default = ["std"]
 std = []
 
 [[bench]]
-name = "bench"
+name = "encode"
 required-features = ["std"]
 harness = false
