@@ -144,6 +144,83 @@ fn encode_script_to_writer() {
     }
 }
 
+const ENCODE_SCRIPT_SINGLE_QUOTED_CASES: [(&str, &str); 4] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    (r"alert(\'<script><\/scrIpt >\');", "alert('<script></scrIpt >');"),
+    (
+        "alert(\"<script><\\/script>\");alert(\\'<script><\\/script >\\');",
+        "alert(\"<script></script>\");alert('<script></script >');",
+    ),
+];
+
+#[test]
+fn encode_script_single_quoted_text() {
+    for (expect, actual) in ENCODE_SCRIPT_SINGLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_script_single_quoted_text(actual));
+    }
+}
+
+#[test]
+fn encode_script_single_quoted_text_to_string() {
+    for (expect, actual) in ENCODE_SCRIPT_SINGLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(
+            expect,
+            html_escape::encode_script_single_quoted_text_to_string(actual, &mut String::new())
+        );
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn encode_script_single_quoted_text_to_writer() {
+    for (expect, actual) in ENCODE_SCRIPT_SINGLE_QUOTED_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::encode_script_single_quoted_text_to_writer(actual, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
+const ENCODE_SCRIPT_QUOTED_CASES: [(&str, &str); 5] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    (r"alert(\'<script><\/scrIpt >\');", "alert('<script></scrIpt >');"),
+    (
+        "alert(\\\"<script><\\/script>\\\");alert(\\'<script><\\/script >\\');",
+        "alert(\"<script></script>\");alert('<script></script >');",
+    ),
+    (r"<\/script>1\'2\'3", "</script>1'2'3"),
+];
+
+#[test]
+fn encode_script_quoted_text() {
+    for (expect, actual) in ENCODE_SCRIPT_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_script_quoted_text(actual));
+    }
+}
+
+#[test]
+fn encode_script_quoted_text_to_string() {
+    for (expect, actual) in ENCODE_SCRIPT_QUOTED_CASES.iter().copied() {
+        assert_eq!(
+            expect,
+            html_escape::encode_script_quoted_text_to_string(actual, &mut String::new())
+        );
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn encode_script_quoted_text_to_writer() {
+    for (expect, actual) in ENCODE_SCRIPT_QUOTED_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::encode_script_quoted_text_to_writer(actual, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
 const ENCODE_STYLE_CASES: [(&str, &str); 4] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
@@ -179,36 +256,78 @@ fn encode_style_to_writer() {
     }
 }
 
-const ENCODE_JAVASCRIPT_SINGLE_QUOTED_CASES: [(&str, &str); 4] = [
+const ENCODE_STYLE_SINGLE_QUOTED_CASES: [(&str, &str); 4] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
-    (r"alert(\'<script><\/scrIpt >\');", "alert('<script></scrIpt >');"),
+    (r"div::after { content: \'<style><\/stYle >\';}", "div::after { content: '<style></stYle >';}"),
     (
-        "alert(\"<script><\\/script>\");alert(\\'<script><\\/script >\\');",
-        "alert(\"<script></script>\");alert('<script></script >');",
+        "div::after { content: \"<style><\\/style>\";} label::after { content: \\'<style><\\/style >\\';}",
+        "div::after { content: \"<style></style>\";} label::after { content: '<style></style >';}",
     ),
 ];
 
 #[test]
-fn encode_javascript_single_quoted_text() {
-    for (expect, actual) in ENCODE_JAVASCRIPT_SINGLE_QUOTED_CASES.iter().copied() {
-        assert_eq!(expect, html_escape::encode_javascript_single_quoted_text(actual));
+fn encode_style_single_quoted_text() {
+    for (expect, actual) in ENCODE_STYLE_SINGLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_style_single_quoted_text(actual));
     }
 }
 
 #[test]
-fn encode_javascript_single_quoted_text_to_string() {
-    for (expect, actual) in ENCODE_JAVASCRIPT_SINGLE_QUOTED_CASES.iter().copied() {
-        assert_eq!(expect, html_escape::encode_javascript_single_quoted_text_to_string(actual, &mut String::new()));
+fn encode_style_single_quoted_text_to_string() {
+    for (expect, actual) in ENCODE_STYLE_SINGLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(
+            expect,
+            html_escape::encode_style_single_quoted_text_to_string(actual, &mut String::new())
+        );
     }
 }
 
 #[cfg(feature = "std")]
 #[test]
-fn encode_javascript_single_quoted_text_to_writer() {
-    for (expect, actual) in ENCODE_JAVASCRIPT_SINGLE_QUOTED_CASES.iter().copied() {
+fn encode_style_single_quoted_text_to_writer() {
+    for (expect, actual) in ENCODE_STYLE_SINGLE_QUOTED_CASES.iter().copied() {
         let mut v = Vec::new();
-        html_escape::encode_javascript_single_quoted_text_to_writer(actual, &mut v).unwrap();
+        html_escape::encode_style_single_quoted_text_to_writer(actual, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
+const ENCODE_STYLE_QUOTED_CASES: [(&str, &str); 5] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    (r"div::after { content: \'<style><\/stYle >\';}", "div::after { content: '<style></stYle >';}"),
+    (
+        "div::after { content: \\\"<style><\\/style>\\\";} label::after { content: \\'<style><\\/style >\\';}",
+        "div::after { content: \"<style></style>\";} label::after { content: '<style></style >';}",
+    ),
+    (r"<\/style>1\'2\'3", "</style>1'2'3"),
+];
+
+#[test]
+fn encode_style_quoted_text() {
+    for (expect, actual) in ENCODE_STYLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_style_quoted_text(actual));
+    }
+}
+
+#[test]
+fn encode_style_quoted_text_to_string() {
+    for (expect, actual) in ENCODE_STYLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(
+            expect,
+            html_escape::encode_style_quoted_text_to_string(actual, &mut String::new())
+        );
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn encode_style_quoted_text_to_writer() {
+    for (expect, actual) in ENCODE_STYLE_QUOTED_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::encode_style_quoted_text_to_writer(actual, &mut v).unwrap();
 
         assert_eq!(expect.as_bytes(), v.as_slice());
     }
