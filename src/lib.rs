@@ -38,14 +38,12 @@ assert_eq!("<input value=Hello&#x20;world&#x21; placeholder=\"The default value 
 ```rust
 extern crate html_escape;
 
-let mut html = String::from("<input value=");
 assert_eq!("Hello world!", html_escape::decode_html_entities("Hello&#x20;world&#x21;"));
 ```
 
 ```rust
 extern crate html_escape;
 
-let mut html = String::from("<input value=");
 assert_eq!("alert('<script></script>');", html_escape::decode_script(r"alert('<script><\/script>');"));
 ```
 
