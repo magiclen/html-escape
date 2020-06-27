@@ -149,7 +149,7 @@ decode_impl! {
     /// The following substring and character are unescaped:
     ///
     /// * `<\/style>` => `</style>`
-    /// * `\"" => `"`
+    /// * `\"` => `"`
     parse_style_double_quoted_text;
     /// Decode text from a double quoted text in the `<style>` element.
     decode_style_double_quoted_text;
@@ -166,7 +166,7 @@ decode_impl! {
     /// The following substring and characters are unescaped:
     ///
     /// * `<\/style>` => `</style>`
-    /// * `\"" => `"`
+    /// * `\"` => `"`
     /// * `\'` => `'`
     parse_style_quoted_text;
     /// Decode text from a quoted text in the `<style>` element.

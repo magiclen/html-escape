@@ -26,11 +26,11 @@ let mut html = String::from("<input value=");
 assert_eq!("Hello&#x20;world&#x21;", html_escape::encode_unquoted_attribute_to_string("Hello world!", &mut html));
 html.push_str(" placeholder=\"");
 assert_eq!("The default value is &quot;Hello world!&quot;.", html_escape::encode_double_quoted_attribute_to_string("The default value is \"Hello world!\".", &mut html));
-html.push_str("\"/><script>");
-assert_eq!(r"alert('<script><\/script>');", html_escape::encode_script_to_string("alert('<script></script>');", &mut html));
-html.push_str("</script>");
+html.push_str("\"/><script>alert('");
+assert_eq!(r"<script>\'s end tag is <\/script>", html_escape::encode_script_single_quoted_text_to_string("<script>'s end tag is </script>", &mut html));
+html.push_str("');</script>");
 
-assert_eq!("<input value=Hello&#x20;world&#x21; placeholder=\"The default value is &quot;Hello world!&quot;.\"/><script>alert('<script><\\/script>');</script>", html);
+assert_eq!("<input value=Hello&#x20;world&#x21; placeholder=\"The default value is &quot;Hello world!&quot;.\"/><script>alert(\'<script>\\\'s end tag is <\\/script>\');</script>", html);
 ```
 
 ### Decoding

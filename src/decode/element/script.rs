@@ -156,7 +156,7 @@ decode_impl! {
     /// The following substring and character are unescaped:
     ///
     /// * `<\/script>` => `</script>`
-    /// * `\"" => `"`
+    /// * `\"` => `"`
     parse_script_double_quoted_text;
     /// Decode text from a double quoted text in the `<script>` element.
     decode_script_double_quoted_text;
@@ -173,7 +173,7 @@ decode_impl! {
     /// The following substring and characters are unescaped:
     ///
     /// * `<\/script>` => `</script>`
-    /// * `\"" => `"`
+    /// * `\"` => `"`
     /// * `\'` => `'`
     parse_script_quoted_text;
     /// Decode text from a quoted text in the `<script>` element.
