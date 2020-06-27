@@ -21,45 +21,81 @@ macro_rules! parse_style {
             1 => {
                 match $e {
                     b'/' => $step = 2,
+                    $(b'\\' => $step = 10,
+                    $(| $addi)+ => {
+                        $step = 0;
+                        $bq
+                    },)?
                     _ => $step = 0,
                 }
             }
             2 => {
                 match $e {
                     b's' | b'S' => $step = 3,
+                    $(b'\\' => $step = 10,
+                    $(| $addi)+ => {
+                        $step = 0;
+                        $bq
+                    },)?
                     _ => $step = 0,
                 }
             }
             3 => {
                 match $e {
                     b't' | b'T' => $step = 4,
+                    $(b'\\' => $step = 10,
+                    $(| $addi)+ => {
+                        $step = 0;
+                        $bq
+                    },)?
                     _ => $step = 0,
                 }
             }
             4 => {
                 match $e {
                     b'y' | b'Y' => $step = 5,
+                    $(b'\\' => $step = 10,
+                    $(| $addi)+ => {
+                        $step = 0;
+                        $bq
+                    },)?
                     _ => $step = 0,
                 }
             }
             5 => {
                 match $e {
                     b'l' | b'L' => $step = 6,
+                    $(b'\\' => $step = 10,
+                    $(| $addi)+ => {
+                        $step = 0;
+                        $bq
+                    },)?
                     _ => $step = 0,
                 }
             }
             6 => {
                 match $e {
                     b'e' | b'E' => $step = 7,
+                    $(b'\\' => $step = 10,
+                    $(| $addi)+ => {
+                        $step = 0;
+                        $bq
+                    },)?
                     _ => $step = 0,
                 }
             }
             7 => {
-                $step = 0;
-
                 match $e {
-                    b' ' | b'>' => $b
-                    _ => (),
+                    b' ' | b'>' => {
+                        $step = 0;
+                        $b
+                    },
+                    $(b'\\' => $step = 10,
+                    $(| $addi)+ => {
+                        $step = 0;
+                        $bq
+                    },)?
+                    _ => $step = 0,
                 }
             }
             10 => {

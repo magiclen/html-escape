@@ -95,14 +95,44 @@ benchmark_impl!(
 benchmark_impl!(safe, encode_safe, encode_safe_to_string, encode_safe_to_writer);
 
 benchmark_impl!(script, encode_script, encode_script_to_string, encode_script_to_writer);
-benchmark_impl!(script_single_quoted_text, encode_script_single_quoted_text, encode_script_single_quoted_text_to_string, encode_script_single_quoted_text_to_writer);
-benchmark_impl!(script_double_quoted_text, encode_script_double_quoted_text, encode_script_double_quoted_text_to_string, encode_script_double_quoted_text_to_writer);
-benchmark_impl!(script_quoted_text, encode_script_quoted_text, encode_script_quoted_text_to_string, encode_script_quoted_text_to_writer);
+benchmark_impl!(
+    script_single_quoted_text,
+    encode_script_single_quoted_text,
+    encode_script_single_quoted_text_to_string,
+    encode_script_single_quoted_text_to_writer
+);
+benchmark_impl!(
+    script_double_quoted_text,
+    encode_script_double_quoted_text,
+    encode_script_double_quoted_text_to_string,
+    encode_script_double_quoted_text_to_writer
+);
+benchmark_impl!(
+    script_quoted_text,
+    encode_script_quoted_text,
+    encode_script_quoted_text_to_string,
+    encode_script_quoted_text_to_writer
+);
 
 benchmark_impl!(style, encode_style, encode_style_to_string, encode_style_to_writer);
-benchmark_impl!(style_single_quoted_text, encode_style_single_quoted_text, encode_style_single_quoted_text_to_string, encode_style_single_quoted_text_to_writer);
-benchmark_impl!(style_double_quoted_text, encode_style_double_quoted_text, encode_style_double_quoted_text_to_string, encode_style_double_quoted_text_to_writer);
-benchmark_impl!(style_quoted_text, encode_style_quoted_text, encode_style_quoted_text_to_string, encode_style_quoted_text_to_writer);
+benchmark_impl!(
+    style_single_quoted_text,
+    encode_style_single_quoted_text,
+    encode_style_single_quoted_text_to_string,
+    encode_style_single_quoted_text_to_writer
+);
+benchmark_impl!(
+    style_double_quoted_text,
+    encode_style_double_quoted_text,
+    encode_style_double_quoted_text_to_string,
+    encode_style_double_quoted_text_to_writer
+);
+benchmark_impl!(
+    style_quoted_text,
+    encode_style_quoted_text,
+    encode_style_quoted_text_to_string,
+    encode_style_quoted_text_to_writer
+);
 
 benchmark_main!(
     text_minimal,

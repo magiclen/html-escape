@@ -1,3 +1,5 @@
+mod unquoted_attribute;
+
 use core::str::from_utf8_unchecked;
 
 use alloc::borrow::Cow;
@@ -6,6 +8,8 @@ use alloc::vec::Vec;
 
 #[cfg(feature = "std")]
 use std::io::{self, Write};
+
+pub use unquoted_attribute::*;
 
 macro_rules! escape_impl {
     (@inner [$dollar:tt] $name:ident; $($l:expr => $r:expr),+ $(,)*) => {
