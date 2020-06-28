@@ -36,13 +36,11 @@ pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
         e = text_bytes[p];
 
-        let width = unsafe { utf8_width::get_width_assume_valid(e) };
-
-        if width == 1 && !is_alphanumeric(e) {
+        if utf8_width::is_width_1(e) && !is_alphanumeric(e) {
             break;
         }
 
-        p += width;
+        p += 1;
     }
 
     let mut v = Vec::with_capacity(text_length);
@@ -98,22 +96,16 @@ pub fn encode_unquoted_attribute_to_vec<S: AsRef<str>>(text: S, output: &mut Vec
 
     let mut start = 0;
 
-    loop {
-        if p == text_length {
-            break;
-        }
-
+    while p < text_length {
         e = text_bytes[p];
 
-        let width = unsafe { utf8_width::get_width_assume_valid(e) };
-
-        if width == 1 && !is_alphanumeric(e) {
+        if utf8_width::is_width_1(e) && !is_alphanumeric(e) {
             output.extend_from_slice(&text_bytes[start..p]);
             start = p + 1;
             write_html_entity_to_vec(e, output);
         }
 
-        p += width;
+        p += 1;
     }
 
     output.extend_from_slice(&text_bytes[start..p]);
@@ -152,15 +144,13 @@ pub fn encode_unquoted_attribute_to_writer<S: AsRef<str>, W: Write>(
 
         e = text_bytes[p];
 
-        let width = unsafe { utf8_width::get_width_assume_valid(e) };
-
-        if width == 1 && !is_alphanumeric(e) {
+        if utf8_width::is_width_1(e) && !is_alphanumeric(e) {
             output.write_all(&text_bytes[start..p])?;
             start = p + 1;
             write_html_entity_to_writer(e, output)?;
         }
 
-        p += width;
+        p += 1;
     }
 
     output.write_all(&text_bytes[start..p])
