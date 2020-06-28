@@ -137,11 +137,7 @@ pub fn encode_unquoted_attribute_to_writer<S: AsRef<str>, W: Write>(
 
     let mut start = 0;
 
-    loop {
-        if p == text_length {
-            break;
-        }
-
+    while p < text_length {
         e = text_bytes[p];
 
         if utf8_width::is_width_1(e) && !is_alphanumeric(e) {
