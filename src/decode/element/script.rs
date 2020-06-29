@@ -77,7 +77,7 @@ macro_rules! parse_script {
             }
             9 => {
                 match $e {
-                    b' ' | b'>' => {
+                    b'>' | 9..=13 | 28..=32 => {
                         $step = 0;
                         $b
                     },
