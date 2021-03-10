@@ -5,7 +5,7 @@ use std::io::{self, Write};
 
 #[inline]
 pub(crate) fn is_alphanumeric(e: u8) -> bool {
-    b'0' <= e && e <= b'9' || b'a' <= e && e <= b'z' || b'A' <= e && e <= b'Z'
+    (b'0'..=b'9').contains(&e) || (b'a'..=b'z').contains(&e) || (b'A'..=b'Z').contains(&e)
 }
 
 #[inline]
