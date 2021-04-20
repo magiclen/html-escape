@@ -36,7 +36,7 @@ pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
 
         e = text_bytes[p];
 
-        if utf8_width::is_width_1(e) && !is_alphanumeric(e) {
+        if utf8_width::is_width_1(e) && !e.is_ascii_alphanumeric() {
             break;
         }
 
@@ -99,7 +99,7 @@ pub fn encode_unquoted_attribute_to_vec<S: AsRef<str>>(text: S, output: &mut Vec
     while p < text_length {
         e = text_bytes[p];
 
-        if utf8_width::is_width_1(e) && !is_alphanumeric(e) {
+        if utf8_width::is_width_1(e) && !e.is_ascii_alphanumeric() {
             output.extend_from_slice(&text_bytes[start..p]);
             start = p + 1;
             write_html_entity_to_vec(e, output);
@@ -140,7 +140,7 @@ pub fn encode_unquoted_attribute_to_writer<S: AsRef<str>, W: Write>(
     while p < text_length {
         e = text_bytes[p];
 
-        if utf8_width::is_width_1(e) && !is_alphanumeric(e) {
+        if utf8_width::is_width_1(e) && !e.is_ascii_alphanumeric() {
             output.write_all(&text_bytes[start..p])?;
             start = p + 1;
             write_html_entity_to_writer(e, output)?;

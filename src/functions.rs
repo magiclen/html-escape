@@ -4,11 +4,6 @@ use alloc::vec::Vec;
 use std::io::{self, Write};
 
 #[inline]
-pub(crate) fn is_alphanumeric(e: u8) -> bool {
-    (b'0'..=b'9').contains(&e) || (b'a'..=b'z').contains(&e) || (b'A'..=b'Z').contains(&e)
-}
-
-#[inline]
 pub(crate) fn write_hex_to_vec(e: u8, output: &mut Vec<u8>) {
     output.reserve(6);
 
