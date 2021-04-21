@@ -21,17 +21,6 @@ jobs:
   clippy:
     runs-on: ubuntu-latest
     steps:
-      - name: Install ImageMagick
-        run: |
-          sudo apt update
-          sudo apt install libwebp-dev
-          wget http://www.imagemagick.org/download/ImageMagick.tar.gz
-          tar xf ImageMagick.tar.gz
-          mkdir /tmp/ImageMagick-lib
-          cd ImageMagick-*
-          ./configure --enable-hdri --with-webp
-          make
-          sudo make install
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
