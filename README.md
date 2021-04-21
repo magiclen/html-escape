@@ -1,7 +1,7 @@
 HTML Escape
 ====================
 
-[![Build Status](https://travis-ci.org/magiclen/html-escape.svg?branch=master)](https://travis-ci.org/magiclen/html-escape)
+[![CI](https://github.com/magiclen/html-escape/actions/workflows/ci.yml/badge.svg)](https://github.com/magiclen/html-escape/actions/workflows/ci.yml)
 
 This library is for encoding/escaping special characters in HTML and decoding/unescaping HTML entities as well.
 

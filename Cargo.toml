@@ -1,6 +1,6 @@
 [package]
 name = "html-escape"
-version = "0.2.8"
+version = "0.2.9"
 authors = ["Magic Len <len@magiclen.org>"]
 edition = "2018"
 repository = "https://github.com/magiclen/html-escape"
@@ -11,10 +11,6 @@ description = "This library is for encoding/escaping special characters in HTML 
 readme = "README.md"
 license = "MIT"
 include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE", "benches/encode.rs"]
-
-[badges.travis-ci]
-repository = "magiclen/html-escape"
-branch = "master"
 
 [dependencies]
 utf8-width = "0.1"
