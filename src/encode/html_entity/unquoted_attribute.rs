@@ -7,8 +7,6 @@ use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::io::{self, Write};
 
-use utf8_width;
-
 use crate::functions::*;
 
 /// Encode text used in an unquoted attribute. Except for alphanumeric characters, escape all characters which are less than 128.
