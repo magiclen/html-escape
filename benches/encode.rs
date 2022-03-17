@@ -1,11 +1,6 @@
-extern crate html_escape;
-
-#[macro_use]
-extern crate bencher;
-
 use std::fs;
 
-use bencher::Bencher;
+use bencher::{benchmark_group, benchmark_main, Bencher};
 
 #[cfg(unix)]
 const TEXT_PATH: &str = "benches/data/vgilante.txt";

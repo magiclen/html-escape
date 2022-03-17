@@ -12,16 +12,12 @@ This crate provides some `encode_*` functions to encode HTML text in different s
 For example, to put a text between a start tag `<foo>` and an end tag `</foo>`, use the `encode_text` function to escape every `&`, `<`, and `>` in the text.
 
 ```rust
-extern crate html_escape;
-
 assert_eq!("a &gt; b &amp;&amp; a &lt; c", html_escape::encode_text("a > b && a < c"));
 ```
 
 The functions suffixed with `_to_writer`, `_to_vec` or `_to_string` are useful to generate HTML.
 
 ```rust
-extern crate html_escape;
-
 let mut html = String::from("<input value=");
 assert_eq!("Hello&#x20;world&#x21;", html_escape::encode_unquoted_attribute_to_string("Hello world!", &mut html));
 html.push_str(" placeholder=\"");
@@ -36,14 +32,10 @@ assert_eq!("<input value=Hello&#x20;world&#x21; placeholder=\"The default value 
 ### Decoding
 
 ```rust
-extern crate html_escape;
-
 assert_eq!("Hello world!", html_escape::decode_html_entities("Hello&#x20;world&#x21;"));
 ```
 
 ```rust
-extern crate html_escape;
-
 assert_eq!("alert('<script></script>');", html_escape::decode_script(r"alert('<script><\/script>');"));
 ```
 
@@ -67,8 +59,6 @@ cargo bench
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
-
-extern crate utf8_width;
 
 mod decode;
 mod encode;

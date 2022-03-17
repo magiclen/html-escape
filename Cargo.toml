@@ -2,7 +2,7 @@
 name = "html-escape"
 version = "0.2.9"
 authors = ["Magic Len <len@magiclen.org>"]
-edition = "2018"
+edition = "2021"
 repository = "https://github.com/magiclen/html-escape"
 homepage = "https://magiclen.org/html-escape"
 keywords = ["html", "escape", "unescape", "encode", "decode"]

@@ -1,5 +1,3 @@
-extern crate html_escape;
-
 const TEXT_MINIMAL_CASES: [(&str, &str); 7] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),

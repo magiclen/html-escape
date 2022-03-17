@@ -1,5 +1,3 @@
-extern crate html_escape;
-
 const SCRIPT_CASES: [(&str, &str); 4] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
