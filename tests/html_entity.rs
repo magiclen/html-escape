@@ -65,7 +65,7 @@ const SAFE_CASES: [(&str, &str); 7] = [
     ("&quot;bread&quot; &amp; 奶油", "\"bread\" & 奶油"),
     ("&lt; less than", "< less than"),
     ("greater than &gt;", "greater than >"),
-    ("https:&#x2F;&#x2F;magiclen.org", "https://magiclen.org"),
+    ("https:&#47;&#47;magiclen.org", "https://magiclen.org"),
 ];
 
 #[test]
@@ -126,7 +126,7 @@ const UNQUOTED_ATTRIBUTE_CASES: [(&str, &str); 7] = [
     ("&quot;bread&quot;&#x20;&amp;&#x20;奶油", "\"bread\" & 奶油"),
     ("&lt;&#x20;less&#x20;than", "< less than"),
     ("greater&#x20;than&#x20;&gt;", "greater than >"),
-    ("https&#x3A;&#x2F;&#x2F;magiclen&#x2E;org", "https://magiclen.org"),
+    ("https&#x3A;&#47;&#47;magiclen&#x2E;org", "https://magiclen.org"),
     ("d&#x2D;none&#x20;m&#x2D;0", "d-none m-0"),
 ];
 
