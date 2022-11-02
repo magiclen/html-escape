@@ -1,6 +1,6 @@
 [package]
 name = "html-escape"
-version = "0.2.11"
+version = "0.2.12"
 authors = ["Magic Len <len@magiclen.org>"]
 edition = "2021"
 repository = "https://github.com/magiclen/html-escape"
