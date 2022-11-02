@@ -81,7 +81,7 @@ escape_impl! {
     b'&' => b"&amp;",
     b'<' => b"&lt;",
     b'>' => b"&gt;",
-    b'\'' => b"&#39;",
+    b'\'' => b"&#x27;",
 }
 
 escape_impl! {
@@ -90,7 +90,7 @@ escape_impl! {
     b'<' => b"&lt;",
     b'>' => b"&gt;",
     b'"' => b"&quot;",
-    b'\'' => b"&#39;",
+    b'\'' => b"&#x27;",
 }
 
 escape_impl! {
@@ -99,8 +99,8 @@ escape_impl! {
     b'<' => b"&lt;",
     b'>' => b"&gt;",
     b'"' => b"&quot;",
-    b'\'' => b"&#39;",
-    b'/' => b"&#47;",
+    b'\'' => b"&#x27;",
+    b'/' => b"&#x2F;",
 }
 
 macro_rules! encode_impl {
@@ -250,7 +250,7 @@ encode_impl! {
     /// * `&` => `&amp;`
     /// * `<` => `&lt;`
     /// * `>` => `&gt;`
-    /// * `'` => `&#39;`
+    /// * `'` => `&#x27;`
     escape_single_quote;
     /// Encode text used in a single-quoted attribute.
     encode_single_quoted_attribute;
@@ -269,7 +269,7 @@ encode_impl! {
     /// * `<` => `&lt;`
     /// * `>` => `&gt;`
     /// * `"` => `&quot;`
-    /// * `'` => `&#39;`
+    /// * `'` => `&#x27;`
     escape_quote;
     /// Encode text used in a quoted attribute.
     encode_quoted_attribute;
@@ -288,8 +288,8 @@ encode_impl! {
     /// * `<` => `&lt;`
     /// * `>` => `&gt;`
     /// * `"` => `&quot;`
-    /// * `'` => `&#39;`
-    /// * `/` => `&#47;`
+    /// * `'` => `&#x27;`
+    /// * `/` => `&#x2F;`
     escape_safe;
     /// Encode text to prevent special characters functioning.
     encode_safe;
