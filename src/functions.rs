@@ -39,7 +39,7 @@ pub(crate) fn write_hex_to_vec(e: u8, output: &mut Vec<u8>) {
 #[cfg(feature = "std")]
 #[inline]
 pub(crate) fn write_hex_to_writer<W: Write>(e: u8, output: &mut W) -> Result<(), io::Error> {
-    output.write_fmt(format_args!("&#x{:02X};", e))
+    output.write_fmt(format_args!("&#x{e:02X};"))
 }
 
 #[inline]
