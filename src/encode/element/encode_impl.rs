@@ -37,6 +37,13 @@ macro_rules! encode_impl {
                         v.extend_from_slice(&text_bytes[..p]);
 
                         break (v, p);
+                    },
+                    {
+                        let mut v = Vec::with_capacity(text_length + 1);
+
+                        v.extend_from_slice(&text_bytes[..(p - 2)]);
+
+                        break (v, p - 2);
                     }
                 );
 
@@ -59,6 +66,11 @@ macro_rules! encode_impl {
                     {
                         v.extend_from_slice(&text_bytes[start..p]);
                         start = p;
+                        v.push(b'\\');
+                    },
+                    {
+                        v.extend_from_slice(&text_bytes[start..(p - 2)]);
+                        start = p - 2;
                         v.push(b'\\');
                     }
                 );
@@ -110,6 +122,11 @@ macro_rules! encode_impl {
                         output.extend_from_slice(&text_bytes[start..end]);
                         start = end;
                         output.push(b'\\');
+                    },
+                    {
+                        output.extend_from_slice(&text_bytes[start..(end - 2)]);
+                        start = end - 2;
+                        output.push(b'\\');
                     }
                 );
 
@@ -147,6 +164,11 @@ macro_rules! encode_impl {
                     {
                         output.write_all(&text_bytes[start..end])?;
                         start = end;
+                        output.write_all(b"\\")?;
+                    },
+                    {
+                        output.write_all(&text_bytes[start..(end - 2)])?;
+                        start = end - 2;
                         output.write_all(b"\\")?;
                     }
                 );

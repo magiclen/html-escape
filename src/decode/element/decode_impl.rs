@@ -35,6 +35,13 @@ macro_rules! decode_impl {
                         v.extend_from_slice(&text_bytes[..(p - 1)]);
 
                         break (v, p);
+                    },
+                    {
+                        let mut v = Vec::with_capacity(text_length);
+
+                        v.extend_from_slice(&text_bytes[..(p - 3)]);
+
+                        break (v, p - 2);
                     }
                 );
 
@@ -52,6 +59,10 @@ macro_rules! decode_impl {
                     {
                         v.extend_from_slice(&text_bytes[start..(p - 1)]);
                         start = p;
+                    },
+                    {
+                        v.extend_from_slice(&text_bytes[start..(p - 3)]);
+                        start = p - 2;
                     }
                 );
 
@@ -98,6 +109,10 @@ macro_rules! decode_impl {
                     {
                         output.extend_from_slice(&text_bytes[start..(end - 1)]);
                         start = end;
+                    },
+                    {
+                        output.extend_from_slice(&text_bytes[start..(end - 3)]);
+                        start = end - 2;
                     }
                 );
 
@@ -132,6 +147,10 @@ macro_rules! decode_impl {
                     {
                         output.write_all(&text_bytes[start..(end - 1)])?;
                         start = end;
+                    },
+                    {
+                        output.write_all(&text_bytes[start..(end - 3)])?;
+                        start = end - 2;
                     }
                 );
 

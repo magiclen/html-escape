@@ -1,4 +1,4 @@
-const SCRIPT_CASES: [(&str, &str); 4] = [
+const SCRIPT_CASES: [(&str, &str); 7] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
     (r"alert('<script><\/scrIpt >');", "alert('<script></scrIpt >');"),
@@ -6,6 +6,9 @@ const SCRIPT_CASES: [(&str, &str); 4] = [
         r"alert('<script><\/script>');alert('<script><\/script >');",
         "alert('<script></script>');alert('<script></script >');",
     ),
+    (r"alert('<\!--');", "alert('<!--');"),
+    (r"alert('<\!-- -->');alert('<\!--');", "alert('<!-- -->');alert('<!--');"),
+    (r"alert('<script><\!--<\/script>');", "alert('<script><!--</script>');"),
 ];
 
 #[test]
@@ -58,7 +61,7 @@ fn decode_script_to_writer() {
     }
 }
 
-const SCRIPT_SINGLE_QUOTED_CASES: [(&str, &str); 8] = [
+const SCRIPT_SINGLE_QUOTED_CASES: [(&str, &str); 14] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
     (r"alert(\'<script><\/scrIpt >\');", "alert('<script></scrIpt >');"),
@@ -66,10 +69,16 @@ const SCRIPT_SINGLE_QUOTED_CASES: [(&str, &str); 8] = [
         "alert(\"<script><\\/script>\");alert(\\'<script><\\/script >\\');",
         "alert(\"<script></script>\");alert('<script></script >');",
     ),
+    (r"alert(\'<\!--\');", "alert('<!--');"),
+    ("alert(\"<\\!-- -->\");alert(\\'<\\!--\\');", "alert(\"<!-- -->\");alert('<!--');"),
     (r"<\'/script>", "<'/script>"),
     (r"\'<\'/script>", "'<'/script>"),
     (r"</scri\'pt>", "</scri'pt>"),
     (r"\'</scri\'pt>", "'</scri'pt>"),
+    (r"<\'!--", "<'!--"),
+    (r"\'<\'!--", "'<'!--"),
+    (r"<!-\'-", "<!-'-"),
+    (r"\'<!-\'-", "'<!-'-"),
 ];
 
 #[test]
@@ -128,7 +137,7 @@ fn decode_script_single_quoted_text_to_writer() {
     }
 }
 
-const SCRIPT_QUOTED_CASES: [(&str, &str); 5] = [
+const SCRIPT_QUOTED_CASES: [(&str, &str); 7] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
     (r"alert(\'<script><\/scrIpt >\');", "alert('<script></scrIpt >');"),
@@ -137,6 +146,8 @@ const SCRIPT_QUOTED_CASES: [(&str, &str); 5] = [
         "alert(\"<script></script>\");alert('<script></script >');",
     ),
     (r"<\/script>1\'2\'3", "</script>1'2'3"),
+    (r"alert(\'<\!--\');", "alert('<!--');"),
+    ("alert(\\\"<\\!-- -->\\\");alert(\\'<\\!--\\');", "alert(\"<!-- -->\");alert('<!--');"),
 ];
 
 #[test]
@@ -195,13 +206,22 @@ fn decode_script_quoted_text_to_writer() {
     }
 }
 
-const STYLE_CASES: [(&str, &str); 4] = [
+const STYLE_CASES: [(&str, &str); 7] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
     (r"div::after { content: '<style><\/stYle >';}", "div::after { content: '<style></stYle >';}"),
     (
         r"div::after { content: '<style><\/style>';} label::after { content: '<style><\/style >';}",
         "div::after { content: '<style></style>';} label::after { content: '<style></style >';}",
+    ),
+    (r"div::after { content: '<\!--';}", "div::after { content: '<!--';}"),
+    (
+        r"div::after { content: '<\!-- -->';} label::after { content: '<\!--';}",
+        "div::after { content: '<!-- -->';} label::after { content: '<!--';}",
+    ),
+    (
+        r"div::after { content: '<style><\!--<\/style>';}",
+        "div::after { content: '<style><!--</style>';}",
     ),
 ];
 
@@ -255,7 +275,7 @@ fn decode_style_to_writer() {
     }
 }
 
-const STYLE_SINGLE_QUOTED_CASES: [(&str, &str); 8] = [
+const STYLE_SINGLE_QUOTED_CASES: [(&str, &str); 14] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
     (r"div::after { content: \'<style><\/stYle >\';}", "div::after { content: '<style></stYle >';}"),
@@ -263,10 +283,16 @@ const STYLE_SINGLE_QUOTED_CASES: [(&str, &str); 8] = [
         "div::after { content: \"<style><\\/style>\";} label::after { content: \\'<style><\\/style >\\';}",
         "div::after { content: \"<style></style>\";} label::after { content: '<style></style >';}",
     ),
+    (r"alert(\'<\!--\');", "alert('<!--');"),
+    ("alert(\"<\\!-- -->\");alert(\\'<\\!--\\');", "alert(\"<!-- -->\");alert('<!--');"),
     (r"<\'/style>", "<'/style>"),
     (r"\'<\'/style>", "'<'/style>"),
     (r"</sty\'le>", "</sty'le>"),
     (r"\'</sty\'le>", "'</sty'le>"),
+    (r"<\'!--", "<'!--"),
+    (r"\'<\'!--", "'<'!--"),
+    (r"<!-\'-", "<!-'-"),
+    (r"\'<!-\'-", "'<!-'-"),
 ];
 
 #[test]
@@ -325,7 +351,7 @@ fn decode_style_single_quoted_text_to_writer() {
     }
 }
 
-const STYLE_QUOTED_CASES: [(&str, &str); 5] = [
+const STYLE_QUOTED_CASES: [(&str, &str); 7] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
     (r"div::after { content: \'<style><\/stYle >\';}", "div::after { content: '<style></stYle >';}"),
@@ -334,6 +360,8 @@ const STYLE_QUOTED_CASES: [(&str, &str); 5] = [
         "div::after { content: \"<style></style>\";} label::after { content: '<style></style >';}",
     ),
     (r"<\/style>1\'2\'3", "</style>1'2'3"),
+    (r"alert(\'<\!--\');", "alert('<!--');"),
+    ("alert(\\\"<\\!-- -->\\\");alert(\\'<\\!--\\');", "alert(\"<!-- -->\");alert('<!--');"),
 ];
 
 #[test]

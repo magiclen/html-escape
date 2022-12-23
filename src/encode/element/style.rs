@@ -7,13 +7,13 @@ use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::io::{self, Write};
 
-macro_rules! parse_style {
-    ($e:expr, $step:ident, $b:block, $bq:block $(, $($addi:expr),+)?) => {
+macro_rules! parse_style_comment {
+    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block $(, $($addi:expr),+)?) => {
         match $step {
             0 => {
                 match $e {
                     b'<' => $step = 1,
-                    $(b'\\' => $step = 10,
+                    $(b'\\' => $step = 100,
                     $(| $addi)+ => $bq,)?
                     _ => (),
                 }
@@ -21,7 +21,8 @@ macro_rules! parse_style {
             1 => {
                 match $e {
                     b'/' => $step = 2,
-                    $(b'\\' => $step = 10,
+                    b'!' => $step = 10,
+                    $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
                         $bq
@@ -32,7 +33,7 @@ macro_rules! parse_style {
             2 => {
                 match $e {
                     b's' | b'S' => $step = 3,
-                    $(b'\\' => $step = 10,
+                    $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
                         $bq
@@ -43,7 +44,7 @@ macro_rules! parse_style {
             3 => {
                 match $e {
                     b't' | b'T' => $step = 4,
-                    $(b'\\' => $step = 10,
+                    $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
                         $bq
@@ -54,7 +55,7 @@ macro_rules! parse_style {
             4 => {
                 match $e {
                     b'y' | b'Y' => $step = 5,
-                    $(b'\\' => $step = 10,
+                    $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
                         $bq
@@ -65,7 +66,7 @@ macro_rules! parse_style {
             5 => {
                 match $e {
                     b'l' | b'L' => $step = 6,
-                    $(b'\\' => $step = 10,
+                    $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
                         $bq
@@ -76,7 +77,7 @@ macro_rules! parse_style {
             6 => {
                 match $e {
                     b'e' | b'E' => $step = 7,
-                    $(b'\\' => $step = 10,
+                    $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
                         $bq
@@ -90,7 +91,7 @@ macro_rules! parse_style {
                         $step = 0;
                         $b
                     },
-                    $(b'\\' => $step = 10,
+                    $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
                         $bq
@@ -99,6 +100,31 @@ macro_rules! parse_style {
                 }
             }
             10 => {
+                match $e {
+                    b'-' => $step = 11,
+                    $(b'\\' => $step = 100,
+                    $(| $addi)+ => {
+                        $step = 0;
+                        $bq
+                    },)?
+                    _ => $step = 0,
+                }
+            }
+            11 => {
+                match $e {
+                    b'-' => {
+                        $step = 0;
+                        $bc
+                    },
+                    $(b'\\' => $step = 100,
+                    $(| $addi)+ => {
+                        $step = 0;
+                        $bq
+                    },)?
+                    _ => $step = 0,
+                }
+            }
+            100 => {
                 match $e {
                     b'<' => $step = 1,
                     _ => $step = 0,
@@ -109,21 +135,21 @@ macro_rules! parse_style {
     };
 }
 
-macro_rules! parse_style_single_quoted_text {
-    ($e:expr, $step:ident, $b:block, $bq:block) => {
-        parse_style!($e, $step, $b, $bq, b'\'');
+macro_rules! parse_style_comment_single_quoted_text {
+    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block) => {
+        parse_style_comment!($e, $step, $b, $bq, $bc, b'\'');
     };
 }
 
-macro_rules! parse_style_double_quoted_text {
-    ($e:expr, $step:ident, $b:block, $bq:block) => {
-        parse_style!($e, $step, $b, $bq, b'"');
+macro_rules! parse_style_comment_double_quoted_text {
+    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block) => {
+        parse_style_comment!($e, $step, $b, $bq, $bc, b'"');
     };
 }
 
-macro_rules! parse_style_quoted_text {
-    ($e:expr, $step:ident, $b:block, $bq:block) => {
-        parse_style!($e, $step, $b, $bq, b'\'', b'"');
+macro_rules! parse_style_comment_quoted_text {
+    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block) => {
+        parse_style_comment!($e, $step, $b, $bq, $bc, b'\'', b'"');
     };
 }
 
@@ -132,7 +158,8 @@ encode_impl! {
     /// The following substring is escaped:
     ///
     /// * `</style>` => `<\/style>`
-    parse_style;
+    /// * `<!--` => `<\!--`
+    parse_style_comment;
     /// Encode text used in the `<style>` element.
     encode_style;
     /// Write text used in the `<style>` element to a mutable `String` reference and return the encoded string slice.
@@ -149,7 +176,8 @@ encode_impl! {
     ///
     /// * `</style>` => `<\/style>`
     /// * `'` => `\'`
-    parse_style_single_quoted_text;
+    /// * `<!--` => `<\!--`
+    parse_style_comment_single_quoted_text;
     /// Encode text used in a single quoted text in the `<style>` element.
     encode_style_single_quoted_text;
     /// Write text used in a single quoted text in the `<style>` element to a mutable `String` reference and return the encoded string slice.
@@ -166,7 +194,8 @@ encode_impl! {
     ///
     /// * `</style>` => `<\/style>`
     /// * `"` => `\"`
-    parse_style_double_quoted_text;
+    /// * `<!--` => `<\!--`
+    parse_style_comment_double_quoted_text;
     /// Encode text used in a double quoted text in the `<style>` element.
     encode_style_double_quoted_text;
     /// Write text used in a double quoted text in the `<style>` element to a mutable `String` reference and return the encoded string slice.
@@ -184,7 +213,8 @@ encode_impl! {
     /// * `</style>` => `<\/style>`
     /// * `"` => `\"`
     /// * `'` => `\'`
-    parse_style_quoted_text;
+    /// * `<!--` => `<\!--`
+    parse_style_comment_quoted_text;
     /// Encode text used in a quoted text in the `<style>` element.
     encode_style_quoted_text;
     /// Write text used in a quoted text in the `<style>` element to a mutable `String` reference and return the encoded string slice.

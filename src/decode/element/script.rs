@@ -8,12 +8,12 @@ use alloc::vec::Vec;
 use std::io::{self, Write};
 
 macro_rules! parse_script {
-    ($e:expr, $step:ident, $b:block, $bq:block $(, $($addi:expr),+)?) => {
+    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block $(, $($addi:expr),+)?) => {
         match $step {
             0 => {
                 match $e {
                     b'<' => $step = 1,
-                    b'\\' => $step = 10,
+                    b'\\' => $step = 100,
                     _ => (),
                 }
             }
@@ -26,6 +26,7 @@ macro_rules! parse_script {
             2 => {
                 match $e {
                     b'/' => $step = 3,
+                    b'!' => $step = 10,
                     $($(| $addi)+ => {
                         $step = 0;
                         $bq
@@ -36,42 +37,42 @@ macro_rules! parse_script {
             3 => {
                 match $e {
                     b's' | b'S' => $step = 4,
-                    b'\\' => $step = 10,
+                    b'\\' => $step = 100,
                     _ => $step = 0,
                 }
             }
             4 => {
                 match $e {
                     b'c' | b'C' => $step = 5,
-                    b'\\' => $step = 10,
+                    b'\\' => $step = 100,
                     _ => $step = 0,
                 }
             }
             5 => {
                 match $e {
                     b'r' | b'R' => $step = 6,
-                    b'\\' => $step = 10,
+                    b'\\' => $step = 100,
                     _ => $step = 0,
                 }
             }
             6 => {
                 match $e {
                     b'i' | b'I' => $step = 7,
-                    b'\\' => $step = 10,
+                    b'\\' => $step = 100,
                     _ => $step = 0,
                 }
             }
             7 => {
                 match $e {
                     b'p' | b'P' => $step = 8,
-                    b'\\' => $step = 10,
+                    b'\\' => $step = 100,
                     _ => $step = 0,
                 }
             }
             8 => {
                 match $e {
                     b't' | b'T' => $step = 9,
-                    b'\\' => $step = 10,
+                    b'\\' => $step = 100,
                     _ => $step = 0,
                 }
             }
@@ -81,11 +82,28 @@ macro_rules! parse_script {
                         $step = 0;
                         $b
                     },
-                    b'\\' => $step = 10,
+                    b'\\' => $step = 100,
                     _ => $step = 0,
                 }
             }
             10 => {
+                match $e {
+                    b'-' => $step = 11,
+                    b'\\' => $step = 100,
+                    _ => $step = 0,
+                }
+            }
+            11 => {
+                match $e {
+                    b'-' => {
+                        $step = 0;
+                        $bc
+                    },
+                    b'\\' => $step = 100,
+                    _ => $step = 0,
+                }
+            }
+            100 => {
                 match $e {
                     b'<' => $step = 1,
                      $($(| $addi)+ => {
@@ -101,20 +119,20 @@ macro_rules! parse_script {
 }
 
 macro_rules! parse_script_single_quoted_text {
-    ($e:expr, $step:ident, $b:block, $bq:block) => {
-        parse_script!($e, $step, $b, $bq, b'\'');
+    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block) => {
+        parse_script!($e, $step, $b, $bq, $bc, b'\'');
     };
 }
 
 macro_rules! parse_script_double_quoted_text {
-    ($e:expr, $step:ident, $b:block, $bq:block) => {
-        parse_script!($e, $step, $b, $bq, b'"');
+    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block) => {
+        parse_script!($e, $step, $b, $bq, $bc, b'"');
     };
 }
 
 macro_rules! parse_script_quoted_text {
-    ($e:expr, $step:ident, $b:block, $bq:block) => {
-        parse_script!($e, $step, $b, $bq, b'\'', b'"');
+    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block) => {
+        parse_script!($e, $step, $b, $bq, $bc, b'\'', b'"');
     };
 }
 
