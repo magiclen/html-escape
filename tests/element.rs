@@ -278,9 +278,13 @@ fn decode_style_to_writer() {
 const STYLE_SINGLE_QUOTED_CASES: [(&str, &str); 14] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
-    (r"div::after { content: \'<style><\/stYle >\';}", "div::after { content: '<style></stYle >';}"),
     (
-        "div::after { content: \"<style><\\/style>\";} label::after { content: \\'<style><\\/style >\\';}",
+        r"div::after { content: \'<style><\/stYle >\';}",
+        "div::after { content: '<style></stYle >';}",
+    ),
+    (
+        "div::after { content: \"<style><\\/style>\";} label::after { content: \
+         \\'<style><\\/style >\\';}",
         "div::after { content: \"<style></style>\";} label::after { content: '<style></style >';}",
     ),
     (r"alert(\'<\!--\');", "alert('<!--');"),
@@ -354,9 +358,13 @@ fn decode_style_single_quoted_text_to_writer() {
 const STYLE_QUOTED_CASES: [(&str, &str); 7] = [
     ("", ""),
     ("哈囉，中文！", "哈囉，中文！"),
-    (r"div::after { content: \'<style><\/stYle >\';}", "div::after { content: '<style></stYle >';}"),
     (
-        "div::after { content: \\\"<style><\\/style>\\\";} label::after { content: \\'<style><\\/style >\\';}",
+        r"div::after { content: \'<style><\/stYle >\';}",
+        "div::after { content: '<style></stYle >';}",
+    ),
+    (
+        "div::after { content: \\\"<style><\\/style>\\\";} label::after { content: \
+         \\'<style><\\/style >\\';}",
         "div::after { content: \"<style></style>\";} label::after { content: '<style></style >';}",
     ),
     (r"<\/style>1\'2\'3", "</style>1'2'3"),

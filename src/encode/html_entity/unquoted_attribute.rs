@@ -1,9 +1,5 @@
+use alloc::{borrow::Cow, string::String, vec::Vec};
 use core::str::from_utf8_unchecked;
-
-use alloc::borrow::Cow;
-use alloc::string::String;
-use alloc::vec::Vec;
-
 #[cfg(feature = "std")]
 use std::io::{self, Write};
 

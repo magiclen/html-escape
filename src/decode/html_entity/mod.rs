@@ -1,16 +1,11 @@
 mod tables;
 
-pub use tables::*;
-
-use core::convert::TryFrom;
-use core::str::from_utf8_unchecked;
-
-use alloc::borrow::Cow;
-use alloc::string::String;
-use alloc::vec::Vec;
-
+use alloc::{borrow::Cow, string::String, vec::Vec};
+use core::{convert::TryFrom, str::from_utf8_unchecked};
 #[cfg(feature = "std")]
 use std::io::{self, Write};
+
+pub use tables::*;
 
 use crate::functions::*;
 
@@ -39,21 +34,21 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                     step = 1;
                     ep = p;
                 }
-            }
+            },
             1 => {
                 match e {
                     b'#' => {
                         step = 3;
-                    }
+                    },
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => {
                         step = 2;
-                    }
+                    },
                 }
-            }
+            },
             2 => {
                 if e == b';' {
                     // named
@@ -67,23 +62,23 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                         Ok(index) => {
                             v.extend_from_slice(NAMED_ENTITIES[index].1.as_bytes());
                             break (v, p + 1);
-                        }
+                        },
                         Err(_) => break (v, ep),
                     }
                 }
-            }
+            },
             3 => {
                 match e {
                     b'x' | b'X' => {
                         step = 5;
-                    }
+                    },
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => step = 4,
                 }
-            }
+            },
             4 => {
                 if e == b';' {
                     // numeric
@@ -94,28 +89,26 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                     let number = unsafe { text.get_unchecked((ep + 2)..p) };
 
                     match number.parse::<u32>() {
-                        Ok(number) => {
-                            match char::try_from(number) {
-                                Ok(c) => {
-                                    write_char_to_vec(c, &mut v);
-                                    break (v, p + 1);
-                                }
-                                Err(_) => break (v, ep),
-                            }
-                        }
+                        Ok(number) => match char::try_from(number) {
+                            Ok(c) => {
+                                write_char_to_vec(c, &mut v);
+                                break (v, p + 1);
+                            },
+                            Err(_) => break (v, ep),
+                        },
                         Err(_) => break (v, ep),
                     }
                 }
-            }
+            },
             5 => {
                 match e {
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => step = 6,
                 }
-            }
+            },
             6 => {
                 if e == b';' {
                     // hex
@@ -126,19 +119,17 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                     let hex = unsafe { text.get_unchecked((ep + 3)..p) };
 
                     match u32::from_str_radix(hex, 16) {
-                        Ok(number) => {
-                            match char::try_from(number) {
-                                Ok(c) => {
-                                    write_char_to_vec(c, &mut v);
-                                    break (v, p + 1);
-                                }
-                                Err(_) => break (v, ep),
-                            }
-                        }
+                        Ok(number) => match char::try_from(number) {
+                            Ok(c) => {
+                                write_char_to_vec(c, &mut v);
+                                break (v, p + 1);
+                            },
+                            Err(_) => break (v, ep),
+                        },
                         Err(_) => break (v, ep),
                     }
                 }
-            }
+            },
             _ => unreachable!(),
         }
 
@@ -156,21 +147,21 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                     step = 1;
                     ep = p;
                 }
-            }
+            },
             1 => {
                 match e {
                     b'#' => {
                         step = 3;
-                    }
+                    },
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => {
                         step = 2;
-                    }
+                    },
                 }
-            }
+            },
             2 => {
                 if e == b';' {
                     // named
@@ -186,19 +177,19 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                         v.extend_from_slice(NAMED_ENTITIES[index].1.as_bytes());
                     }
                 }
-            }
+            },
             3 => {
                 match e {
                     b'x' | b'X' => {
                         step = 5;
-                    }
+                    },
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => step = 4,
                 }
-            }
+            },
             4 => {
                 if e == b';' {
                     // numeric
@@ -214,16 +205,16 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                         }
                     }
                 }
-            }
+            },
             5 => {
                 match e {
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => step = 6,
                 }
-            }
+            },
             6 => {
                 if e == b';' {
                     // hex
@@ -239,7 +230,7 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
                         }
                     }
                 }
-            }
+            },
             _ => unreachable!(),
         }
 
@@ -279,21 +270,21 @@ pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>)
                     step = 1;
                     ep = end;
                 }
-            }
+            },
             1 => {
                 match e {
                     b'#' => {
                         step = 3;
-                    }
+                    },
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => {
                         step = 2;
-                    }
+                    },
                 }
-            }
+            },
             2 => {
                 if e == b';' {
                     // named
@@ -309,19 +300,19 @@ pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>)
                         output.extend_from_slice(NAMED_ENTITIES[index].1.as_bytes());
                     }
                 }
-            }
+            },
             3 => {
                 match e {
                     b'x' | b'X' => {
                         step = 5;
-                    }
+                    },
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => step = 4,
                 }
-            }
+            },
             4 => {
                 if e == b';' {
                     // numeric
@@ -337,16 +328,16 @@ pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>)
                         }
                     }
                 }
-            }
+            },
             5 => {
                 match e {
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => step = 6,
                 }
-            }
+            },
             6 => {
                 if e == b';' {
                     // hex
@@ -362,7 +353,7 @@ pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>)
                         }
                     }
                 }
-            }
+            },
             _ => unreachable!(),
         }
 
@@ -396,21 +387,21 @@ pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write>(
                     step = 1;
                     ep = end;
                 }
-            }
+            },
             1 => {
                 match e {
                     b'#' => {
                         step = 3;
-                    }
+                    },
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => {
                         step = 2;
-                    }
+                    },
                 }
-            }
+            },
             2 => {
                 if e == b';' {
                     // named
@@ -426,19 +417,19 @@ pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write>(
                         output.write_all(NAMED_ENTITIES[index].1.as_bytes())?;
                     }
                 }
-            }
+            },
             3 => {
                 match e {
                     b'x' | b'X' => {
                         step = 5;
-                    }
+                    },
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => step = 4,
                 }
-            }
+            },
             4 => {
                 if e == b';' {
                     // numeric
@@ -454,16 +445,16 @@ pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write>(
                         }
                     }
                 }
-            }
+            },
             5 => {
                 match e {
                     b';' => {
                         // incorrect
                         step = 0;
-                    }
+                    },
                     _ => step = 6,
                 }
-            }
+            },
             6 => {
                 if e == b';' {
                     // hex
@@ -479,7 +470,7 @@ pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write>(
                         }
                     }
                 }
-            }
+            },
             _ => unreachable!(),
         }
 

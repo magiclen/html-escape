@@ -1,5 +1,4 @@
 use alloc::vec::Vec;
-
 #[cfg(feature = "std")]
 use std::io::{self, Write};
 
@@ -23,17 +22,9 @@ pub(crate) fn write_hex_to_vec(e: u8, output: &mut Vec<u8>) {
     let he = e >> 4;
     let le = e & 0xF;
 
-    output[3] = if he >= 10 {
-        b'A' - 10 + he
-    } else {
-        b'0' + he
-    };
+    output[3] = if he >= 10 { b'A' - 10 + he } else { b'0' + he };
 
-    output[4] = if le >= 10 {
-        b'A' - 10 + le
-    } else {
-        b'0' + le
-    };
+    output[4] = if le >= 10 { b'A' - 10 + le } else { b'0' + le };
 }
 
 #[cfg(feature = "std")]
