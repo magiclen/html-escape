@@ -4,7 +4,7 @@ macro_rules! decode_impl {
         ///
         $(#[$attr])*
         #[inline]
-        pub fn $decode_name<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
+        pub fn $decode_name<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
             let text = text.as_ref();
             let text_bytes = text.as_bytes();
             let text_length = text_bytes.len();

@@ -10,7 +10,7 @@ pub use tables::*;
 use crate::functions::*;
 
 /// Decode html entities in a given string.
-pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
+pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
     let text = text.as_ref();
     let text_bytes = text.as_bytes();
     let text_length = text_bytes.len();

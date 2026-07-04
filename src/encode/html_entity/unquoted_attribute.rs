@@ -15,7 +15,7 @@ use crate::functions::*;
 /// * `"` => `&quot;`
 ///
 /// Other non-alphanumeric characters are escaped to `&#xHH;`.
-pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<str> {
+pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
     let text = text.as_ref();
     let text_bytes = text.as_bytes();
 
