@@ -212,3 +212,69 @@ fn decode_html_entities_to_writer() {
         assert_eq!(expect.as_bytes(), v.as_slice());
     }
 }
+
+const VALID_ENTITY_AFTER_MALFORMED_CASES: [(&str, &str); 6] = [
+    ("&&amp;", "&&"),
+    ("x &&amp; y", "x && y"),
+    ("&bogus&amp;", "&bogus&"),
+    ("&bogus &amp;", "&bogus &"),
+    ("&#xZZ&amp;", "&#xZZ&"),
+    ("&#bad&amp;", "&#bad&"),
+];
+
+#[test]
+fn decode_html_entities_decodes_valid_entity_after_malformed() {
+    for (text, expect) in VALID_ENTITY_AFTER_MALFORMED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities(text));
+    }
+}
+
+#[test]
+fn decode_html_entities_decodes_valid_entity_after_malformed_to_string() {
+    for (text, expect) in VALID_ENTITY_AFTER_MALFORMED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities_to_string(text, &mut String::new()));
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn decode_html_entities_decodes_valid_entity_after_malformed_to_writer() {
+    for (text, expect) in VALID_ENTITY_AFTER_MALFORMED_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::decode_html_entities_to_writer(text, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
+const STRICT_ENTITY_CASES: [(&str, &str); 4] = [
+    ("&amp", "&amp"),
+    ("&notit;", "&notit;"),
+    ("&#xD800;", "&#xD800;"),
+    ("&#x110000;", "&#x110000;"),
+];
+
+#[test]
+fn decode_html_entities_keeps_strict_cases() {
+    for (text, expect) in STRICT_ENTITY_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities(text));
+    }
+}
+
+#[test]
+fn decode_html_entities_keeps_strict_cases_to_string() {
+    for (text, expect) in STRICT_ENTITY_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities_to_string(text, &mut String::new()));
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn decode_html_entities_keeps_strict_cases_to_writer() {
+    for (text, expect) in STRICT_ENTITY_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::decode_html_entities_to_writer(text, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}

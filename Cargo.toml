@@ -13,7 +13,6 @@ license = "MIT"
 include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE"]
 
 [dependencies]
-utf8-width = "0.1"
 
 [dev-dependencies]
 bencher = "0.1.5"
@@ -26,3 +25,7 @@ std = []
 name = "encode"
 required-features = ["std"]
 harness = false
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
