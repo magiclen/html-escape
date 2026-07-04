@@ -10,7 +10,7 @@ keywords = ["html", "escape", "unescape", "encode", "decode"]
 categories = ["no-std", "encoding"]
 description = "This library is for encoding/escaping special characters in HTML and decoding/unescaping HTML entities as well."
 license = "MIT"
-include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE", "benches/encode.rs"]
+include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE"]
 
 [dependencies]
 utf8-width = "0.1"
