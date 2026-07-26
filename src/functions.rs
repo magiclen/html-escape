@@ -8,9 +8,7 @@ pub(crate) fn write_hex_to_vec(e: u8, output: &mut Vec<u8>) {
 
     let length = output.len();
 
-    unsafe {
-        output.set_len(length + 6);
-    }
+    output.resize(length + 6, 0);
 
     let output = &mut output[length..];
 
@@ -67,9 +65,7 @@ pub(crate) fn write_char_to_vec(c: char, output: &mut Vec<u8>) {
 
     let current_length = output.len();
 
-    unsafe {
-        output.set_len(current_length + width);
-    }
+    output.resize(current_length + width);
 
     c.encode_utf8(&mut output[current_length..]);
 }
