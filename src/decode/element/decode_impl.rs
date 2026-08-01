@@ -71,6 +71,7 @@ macro_rules! decode_impl {
 
             v.extend_from_slice(&text_bytes[start..p]);
 
+            // SAFETY: `v` only contains slices of `text`, split at ASCII bytes, so it is valid UTF-8.
             Cow::from(unsafe { String::from_utf8_unchecked(v) })
         }
 
@@ -79,6 +80,7 @@ macro_rules! decode_impl {
         $(#[$attr])*
         #[inline]
         pub fn $decode_to_string_name<S: AsRef<str>>(text: S, output: &mut String) -> &str {
+            // SAFETY: the decoded data is valid UTF-8, so `output` remains a valid `String`.
             unsafe { from_utf8_unchecked($decode_to_vec_name(text, output.as_mut_vec())) }
         }
 

@@ -130,8 +130,10 @@ macro_rules! encode_impl {
             v.extend_from_slice(&text_bytes[..p]);
             v.extend_from_slice(first);
 
+            // SAFETY: `text_bytes[p]` is the ASCII byte which has just been escaped, so the rest is valid UTF-8.
             $encode_to_vec_name(unsafe { from_utf8_unchecked(&text_bytes[(p + 1)..]) }, &mut v);
 
+            // SAFETY: `v` only contains slices of `text`, split at ASCII bytes, plus ASCII escape sequences, so it is valid UTF-8.
             Cow::from(unsafe { String::from_utf8_unchecked(v) })
         }
 
@@ -140,6 +142,7 @@ macro_rules! encode_impl {
         $(#[$attr])*
         #[inline]
         pub fn $encode_to_string_name<S: AsRef<str>>(text: S, output: &mut String) -> &str {
+            // SAFETY: the encoded data is valid UTF-8, so `output` remains a valid `String`.
             unsafe { from_utf8_unchecked($encode_to_vec_name(text, output.as_mut_vec())) }
         }
 

@@ -75,7 +75,6 @@ fn encode_safe() {
     }
 }
 
-#[cfg(feature = "std")]
 #[test]
 fn encode_safe_to_string() {
     for (expect, text) in SAFE_CASES.iter().copied() {
@@ -101,7 +100,6 @@ fn decode_safe() {
     }
 }
 
-#[cfg(feature = "std")]
 #[test]
 fn decode_safe_to_string() {
     for (text, expect) in SAFE_CASES.iter().copied() {
@@ -247,11 +245,16 @@ fn decode_html_entities_decodes_valid_entity_after_malformed_to_writer() {
     }
 }
 
-const STRICT_ENTITY_CASES: [(&str, &str); 4] = [
+const STRICT_ENTITY_CASES: [(&str, &str); 9] = [
     ("&amp", "&amp"),
     ("&notit;", "&notit;"),
     ("&#xD800;", "&#xD800;"),
     ("&#x110000;", "&#x110000;"),
+    ("&#+65;", "&#+65;"),
+    ("&#x+41;", "&#x+41;"),
+    ("&#0;", "&#0;"),
+    ("&#1;", "&#1;"),
+    ("&#xB;", "&#xB;"),
 ];
 
 #[test]
@@ -276,5 +279,15 @@ fn decode_html_entities_keeps_strict_cases_to_writer() {
         html_escape::decode_html_entities_to_writer(text, &mut v).unwrap();
 
         assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
+const ASCII_WHITESPACE_CASES: [(&str, &str); 4] =
+    [("&#9;", "\t"), ("&#10;", "\n"), ("&#12;", "\u{000C}"), ("&#xD;", "\r")];
+
+#[test]
+fn decode_html_entities_decodes_ascii_whitespace() {
+    for (text, expect) in ASCII_WHITESPACE_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities(text));
     }
 }

@@ -45,10 +45,12 @@ pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, st
     write_html_entity_to_vec(e, &mut v);
 
     encode_unquoted_attribute_to_vec(
+        // SAFETY: `text_bytes[p]` is the ASCII byte which has just been escaped, so the rest is valid UTF-8.
         unsafe { from_utf8_unchecked(&text_bytes[(p + 1)..]) },
         &mut v,
     );
 
+    // SAFETY: `v` only contains slices of `text`, split at ASCII bytes, plus ASCII entities, so it is valid UTF-8.
     Cow::from(unsafe { String::from_utf8_unchecked(v) })
 }
 
@@ -64,6 +66,7 @@ pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, st
 /// Other non-alphanumeric characters are escaped to `&#xHH;`.
 #[inline]
 pub fn encode_unquoted_attribute_to_string<S: AsRef<str>>(text: S, output: &mut String) -> &str {
+    // SAFETY: the encoded data is valid UTF-8, so `output` remains a valid `String`.
     unsafe { from_utf8_unchecked(encode_unquoted_attribute_to_vec(text, output.as_mut_vec())) }
 }
 

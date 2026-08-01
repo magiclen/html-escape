@@ -2,29 +2,28 @@ use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::io::{self, Write};
 
+const HEX_DIGITS: [u8; 16] = *b"0123456789ABCDEF";
+
 #[inline]
 pub(crate) fn write_hex_to_vec(e: u8, output: &mut Vec<u8>) {
     output.reserve(6);
 
     let length = output.len();
 
+    // SAFETY: 6 bytes have just been reserved, and the length is only updated after all of them are initialized.
+    // Writing through a raw pointer never creates a reference to the uninitialized spare capacity.
     unsafe {
+        let p = output.as_mut_ptr().add(length);
+
+        p.write(b'&');
+        p.add(1).write(b'#');
+        p.add(2).write(b'x');
+        p.add(3).write(HEX_DIGITS[(e >> 4) as usize]);
+        p.add(4).write(HEX_DIGITS[(e & 0xF) as usize]);
+        p.add(5).write(b';');
+
         output.set_len(length + 6);
     }
-
-    let output = &mut output[length..];
-
-    output[0] = b'&';
-    output[1] = b'#';
-    output[2] = b'x';
-    output[5] = b';';
-
-    let he = e >> 4;
-    let le = e & 0xF;
-
-    output[3] = if he >= 10 { b'A' - 10 + he } else { b'0' + he };
-
-    output[4] = if le >= 10 { b'A' - 10 + le } else { b'0' + le };
 }
 
 #[cfg(feature = "std")]
@@ -61,17 +60,14 @@ pub(crate) fn write_html_entity_to_writer<W: Write>(
 
 #[inline]
 pub(crate) fn write_char_to_vec(c: char, output: &mut Vec<u8>) {
-    let width = c.len_utf8();
+    match c.len_utf8() {
+        1 => output.push(c as u8),
+        _ => {
+            let mut buffer = [0u8; 4];
 
-    output.reserve(width);
-
-    let current_length = output.len();
-
-    unsafe {
-        output.set_len(current_length + width);
+            output.extend_from_slice(c.encode_utf8(&mut buffer).as_bytes());
+        },
     }
-
-    c.encode_utf8(&mut output[current_length..]);
 }
 
 #[cfg(feature = "std")]

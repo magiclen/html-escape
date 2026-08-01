@@ -1,7 +1,7 @@
 mod tables;
 
 use alloc::{borrow::Cow, string::String, vec::Vec};
-use core::{convert::TryFrom, str::from_utf8_unchecked};
+use core::str::from_utf8_unchecked;
 #[cfg(feature = "std")]
 use std::io::{self, Write};
 
@@ -30,18 +30,44 @@ fn decode_named_entity(name: &[u8]) -> Option<DecodedEntityValue> {
         .map(|index| DecodedEntityValue::Named(NAMED_ENTITIES[index].1))
 }
 
+/// Turn the value of a numeric character reference into a character, rejecting the code points which cannot appear in an HTML document.
+#[inline]
+fn decode_character(number: u32) -> Option<char> {
+    let character = char::try_from(number).ok()?;
+
+    match character {
+        // These are the ASCII whitespace characters, which are legitimate in an HTML document.
+        '\t' | '\n' | '\u{000C}' | '\r' => Some(character),
+        // U+0000 and the other C0 control characters are not.
+        '\0'..='\u{001F}' => None,
+        _ => Some(character),
+    }
+}
+
 #[inline]
 fn decode_decimal_entity(text: &str, start: usize, end: usize) -> Option<DecodedEntityValue> {
-    let number = text[start..end].parse::<u32>().ok()?;
-    let character = char::try_from(number).ok()?;
+    let digits = &text[start..end];
+
+    // `parse` accepts a leading sign, but a numeric character reference consists of digits only.
+    if !digits.as_bytes().first()?.is_ascii_digit() {
+        return None;
+    }
+
+    let character = decode_character(digits.parse::<u32>().ok()?)?;
 
     Some(DecodedEntityValue::Character(character))
 }
 
 #[inline]
 fn decode_hex_entity(text: &str, start: usize, end: usize) -> Option<DecodedEntityValue> {
-    let number = u32::from_str_radix(&text[start..end], 16).ok()?;
-    let character = char::try_from(number).ok()?;
+    let digits = &text[start..end];
+
+    // `from_str_radix` accepts a leading sign, but a numeric character reference consists of digits only.
+    if !digits.as_bytes().first()?.is_ascii_hexdigit() {
+        return None;
+    }
+
+    let character = decode_character(u32::from_str_radix(digits, 16).ok()?)?;
 
     Some(DecodedEntityValue::Character(character))
 }
@@ -229,24 +255,20 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
     };
 
     let mut v = Vec::with_capacity(text_length);
-    let mut start = entity.end;
 
     v.extend_from_slice(&text_bytes[..entity.start]);
     write_decoded_entity_to_vec(entity.value, &mut v);
 
-    while let Some(entity) = find_decoded_entity(text, start) {
-        v.extend_from_slice(&text_bytes[start..entity.start]);
-        write_decoded_entity_to_vec(entity.value, &mut v);
-        start = entity.end;
-    }
+    // `entity.end` is right after a `;`, so it is a UTF-8 boundary.
+    decode_html_entities_to_vec(&text[entity.end..], &mut v);
 
-    v.extend_from_slice(&text_bytes[start..]);
-
+    // SAFETY: every decoded entity is a `char` or a `&str`, and every copied slice is bounded by ASCII bytes, so `v` is valid UTF-8.
     Cow::from(unsafe { String::from_utf8_unchecked(v) })
 }
 
 /// Decode html entities in a given string to a mutable `String` reference and return the decoded string slice.
 pub fn decode_html_entities_to_string<S: AsRef<str>>(text: S, output: &mut String) -> &str {
+    // SAFETY: the decoded data is valid UTF-8, so `output` remains a valid `String`.
     unsafe { from_utf8_unchecked(decode_html_entities_to_vec(text, output.as_mut_vec())) }
 }
 
