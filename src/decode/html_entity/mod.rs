@@ -243,7 +243,11 @@ fn write_decoded_entity_to_writer<W: Write>(
     }
 }
 
-/// Decode html entities in a given string.
+/// Decode HTML entities in a given string.
+///
+/// Only exact named and numeric character references ending with `;` are decoded.
+/// Invalid Unicode scalar values, null, and C0 controls other than ASCII whitespace are left unchanged.
+/// This function does not implement legacy semicolonless references or C1 control replacements.
 pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
     let text = text.as_ref();
     let text_bytes = text.as_bytes();
@@ -266,13 +270,21 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
     Cow::from(unsafe { String::from_utf8_unchecked(v) })
 }
 
-/// Decode html entities in a given string to a mutable `String` reference and return the decoded string slice.
+/// Decode HTML entities in a given string to a mutable `String` reference and return the decoded string slice.
+///
+/// Only exact named and numeric character references ending with `;` are decoded.
+/// Invalid Unicode scalar values, null, and C0 controls other than ASCII whitespace are left unchanged.
+/// This function does not implement legacy semicolonless references or C1 control replacements.
 pub fn decode_html_entities_to_string<S: AsRef<str>>(text: S, output: &mut String) -> &str {
     // SAFETY: the decoded data is valid UTF-8, so `output` remains a valid `String`.
     unsafe { from_utf8_unchecked(decode_html_entities_to_vec(text, output.as_mut_vec())) }
 }
 
-/// Decode html entities in a given string to a mutable `Vec<u8>` reference and return the decoded data slice.
+/// Decode HTML entities in a given string to a mutable `Vec<u8>` reference and return the decoded data slice.
+///
+/// Only exact named and numeric character references ending with `;` are decoded.
+/// Invalid Unicode scalar values, null, and C0 controls other than ASCII whitespace are left unchanged.
+/// This function does not implement legacy semicolonless references or C1 control replacements.
 pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u8] {
     let text = text.as_ref();
     let text_bytes = text.as_bytes();
@@ -296,7 +308,11 @@ pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>)
 }
 
 #[cfg(feature = "std")]
-/// Decode html entities in a given string to a writer.
+/// Decode HTML entities in a given string to a writer.
+///
+/// Only exact named and numeric character references ending with `;` are decoded.
+/// Invalid Unicode scalar values, null, and C0 controls other than ASCII whitespace are left unchanged.
+/// This function does not implement legacy semicolonless references or C1 control replacements.
 pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write>(
     text: S,
     output: &mut W,

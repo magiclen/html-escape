@@ -18,6 +18,7 @@ macro_rules! parse_style_comment {
                 match $e {
                     b'/' => $step = 2,
                     b'!' => $step = 10,
+                    b'<' => $step = 1,
                     $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
@@ -29,6 +30,7 @@ macro_rules! parse_style_comment {
             2 => {
                 match $e {
                     b's' | b'S' => $step = 3,
+                    b'<' => $step = 1,
                     $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
@@ -40,6 +42,7 @@ macro_rules! parse_style_comment {
             3 => {
                 match $e {
                     b't' | b'T' => $step = 4,
+                    b'<' => $step = 1,
                     $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
@@ -51,6 +54,7 @@ macro_rules! parse_style_comment {
             4 => {
                 match $e {
                     b'y' | b'Y' => $step = 5,
+                    b'<' => $step = 1,
                     $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
@@ -62,6 +66,7 @@ macro_rules! parse_style_comment {
             5 => {
                 match $e {
                     b'l' | b'L' => $step = 6,
+                    b'<' => $step = 1,
                     $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
@@ -73,6 +78,7 @@ macro_rules! parse_style_comment {
             6 => {
                 match $e {
                     b'e' | b'E' => $step = 7,
+                    b'<' => $step = 1,
                     $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
@@ -83,10 +89,11 @@ macro_rules! parse_style_comment {
             }
             7 => {
                 match $e {
-                    b'>' | 9..=13 | 28..=32 => {
+                    b'/' | b'>' | 9..=13 | 28..=32 => {
                         $step = 0;
                         $b
                     },
+                    b'<' => $step = 1,
                     $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
@@ -98,6 +105,7 @@ macro_rules! parse_style_comment {
             10 => {
                 match $e {
                     b'-' => $step = 11,
+                    b'<' => $step = 1,
                     $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;
@@ -112,6 +120,7 @@ macro_rules! parse_style_comment {
                         $step = 0;
                         $bc
                     },
+                    b'<' => $step = 1,
                     $(b'\\' => $step = 100,
                     $(| $addi)+ => {
                         $step = 0;

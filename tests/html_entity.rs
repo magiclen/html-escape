@@ -33,6 +33,82 @@ fn encode_text_minimal_to_writer() {
     }
 }
 
+const TEXT_CASES: [(&str, &str); 5] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    ("\"bread\" &amp; 奶油", "\"bread\" & 奶油"),
+    ("&lt; less than", "< less than"),
+    ("greater than &gt;", "greater than >"),
+];
+
+#[test]
+fn encode_text() {
+    for (expect, text) in TEXT_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_text(text));
+    }
+}
+
+const DOUBLE_QUOTED_ATTRIBUTE_CASES: [(&str, &str); 4] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    ("&quot;bread&quot; &amp; 奶油", "\"bread\" & 奶油"),
+    ("'single' &lt;tag&gt;", "'single' <tag>"),
+];
+
+#[test]
+fn encode_double_quoted_attribute() {
+    for (expect, text) in DOUBLE_QUOTED_ATTRIBUTE_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_double_quoted_attribute(text));
+    }
+}
+
+const SINGLE_QUOTED_ATTRIBUTE_CASES: [(&str, &str); 4] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    ("&#x27;bread&#x27; &amp; 奶油", "'bread' & 奶油"),
+    ("\"double\" &lt;tag&gt;", "\"double\" <tag>"),
+];
+
+#[test]
+fn encode_single_quoted_attribute() {
+    for (expect, text) in SINGLE_QUOTED_ATTRIBUTE_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_single_quoted_attribute(text));
+    }
+}
+
+const QUOTED_ATTRIBUTE_CASES: [(&str, &str); 4] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    ("&quot;bread&quot; &amp; &#x27;奶油&#x27;", "\"bread\" & '奶油'"),
+    ("&lt;tag&gt;", "<tag>"),
+];
+
+#[test]
+fn encode_quoted_attribute() {
+    for (expect, text) in QUOTED_ATTRIBUTE_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_quoted_attribute(text));
+    }
+}
+
+#[test]
+fn html_entity_to_vec_appends_and_returns_written_data() {
+    let mut encoded = b"prefix:".to_vec();
+
+    assert_eq!(
+        b"&quot;bread&quot; &amp; &#x27;butter&#x27;",
+        html_escape::encode_quoted_attribute_to_vec("\"bread\" & 'butter'", &mut encoded)
+    );
+    assert_eq!(b"prefix:&quot;bread&quot; &amp; &#x27;butter&#x27;", encoded.as_slice());
+
+    let mut decoded = b"prefix:".to_vec();
+
+    assert_eq!(
+        b"<bread & butter>",
+        html_escape::decode_html_entities_to_vec("&lt;bread &amp; butter&gt;", &mut decoded)
+    );
+    assert_eq!(b"prefix:<bread & butter>", decoded.as_slice());
+}
+
 #[test]
 fn decode_text_minimal() {
     for (text, expect) in TEXT_MINIMAL_CASES.iter().copied() {

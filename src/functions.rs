@@ -29,7 +29,10 @@ pub(crate) fn write_hex_to_vec(e: u8, output: &mut Vec<u8>) {
 #[cfg(feature = "std")]
 #[inline]
 pub(crate) fn write_hex_to_writer<W: Write>(e: u8, output: &mut W) -> Result<(), io::Error> {
-    output.write_fmt(format_args!("&#x{e:02X};"))
+    let entity =
+        [b'&', b'#', b'x', HEX_DIGITS[(e >> 4) as usize], HEX_DIGITS[(e & 0xF) as usize], b';'];
+
+    output.write_all(&entity)
 }
 
 #[inline]

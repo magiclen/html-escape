@@ -12,6 +12,32 @@ const SCRIPT_CASES: [(&str, &str); 7] = [
 ];
 
 #[test]
+fn encode_element_overlapping_candidates() {
+    assert_eq!(r"<<\/script>", html_escape::encode_script("<</script>"));
+    assert_eq!(r"<<\!--", html_escape::encode_script("<<!--"));
+    assert_eq!(r"</scr<\/script>", html_escape::encode_script("</scr</script>"));
+    assert_eq!(r"<\/script/>", html_escape::encode_script("</script/>"));
+    assert_eq!(r"<<\/style>", html_escape::encode_style("<</style>"));
+    assert_eq!(r"<<\!--", html_escape::encode_style("<<!--"));
+    assert_eq!(r"</sty<\/style>", html_escape::encode_style("</sty</style>"));
+    assert_eq!(r"<\/style/>", html_escape::encode_style("</style/>"));
+}
+
+#[test]
+fn decode_element_requires_adjacent_escape_sequences() {
+    assert_eq!(r"<abc\/script>", html_escape::decode_script(r"<abc\/script>"));
+    assert_eq!(r"<abc\!--", html_escape::decode_script(r"<abc\!--"));
+    assert_eq!(r"<\/scr</script>", html_escape::decode_script(r"<\/scr<\/script>"));
+    assert_eq!(r"<</script>", html_escape::decode_script(r"<<\/script>"));
+    assert_eq!(r"</script/>", html_escape::decode_script(r"<\/script/>"));
+    assert_eq!(r"<abc\/style>", html_escape::decode_style(r"<abc\/style>"));
+    assert_eq!(r"<abc\!--", html_escape::decode_style(r"<abc\!--"));
+    assert_eq!(r"<\/sty</style>", html_escape::decode_style(r"<\/sty<\/style>"));
+    assert_eq!(r"<</style>", html_escape::decode_style(r"<<\/style>"));
+    assert_eq!(r"</style/>", html_escape::decode_style(r"<\/style/>"));
+}
+
+#[test]
 fn encode_script() {
     for (expect, text) in SCRIPT_CASES.iter().copied() {
         assert_eq!(expect, html_escape::encode_script(text));
@@ -135,6 +161,52 @@ fn decode_script_single_quoted_text_to_writer() {
 
         assert_eq!(expect.as_bytes(), v.as_slice());
     }
+}
+
+const SCRIPT_DOUBLE_QUOTED_CASES: [(&str, &str); 4] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    (r#"alert(\"<script><\/script>\");"#, r#"alert("<script></script>");"#),
+    (r#"alert(\"<\!--\");"#, r#"alert("<!--");"#),
+];
+
+#[test]
+fn encode_script_double_quoted_text() {
+    for (expect, text) in SCRIPT_DOUBLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_script_double_quoted_text(text));
+    }
+}
+
+#[test]
+fn decode_script_double_quoted_text() {
+    for (text, expect) in SCRIPT_DOUBLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_script_double_quoted_text(text));
+    }
+}
+
+#[test]
+fn element_to_vec_appends_and_returns_written_data() {
+    let mut encoded = b"prefix:".to_vec();
+
+    assert_eq!(
+        r#"\"<script><\/script>\""#.as_bytes(),
+        html_escape::encode_script_double_quoted_text_to_vec(
+            r#""<script></script>""#,
+            &mut encoded
+        )
+    );
+    assert_eq!(br#"prefix:\"<script><\/script>\""#, encoded.as_slice());
+
+    let mut decoded = b"prefix:".to_vec();
+
+    assert_eq!(
+        r#""<script></script>""#.as_bytes(),
+        html_escape::decode_script_double_quoted_text_to_vec(
+            r#"\"<script><\/script>\""#,
+            &mut decoded
+        )
+    );
+    assert_eq!(br#"prefix:"<script></script>""#, decoded.as_slice());
 }
 
 const SCRIPT_QUOTED_CASES: [(&str, &str); 7] = [
@@ -352,6 +424,30 @@ fn decode_style_single_quoted_text_to_writer() {
         html_escape::decode_style_single_quoted_text_to_writer(text, &mut v).unwrap();
 
         assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
+const STYLE_DOUBLE_QUOTED_CASES: [(&str, &str); 4] = [
+    ("", ""),
+    ("哈囉，中文！", "哈囉，中文！"),
+    (
+        r#"div::after { content: \"<style><\/style>\";}"#,
+        r#"div::after { content: "<style></style>";}"#,
+    ),
+    (r#"div::after { content: \"<\!--\";}"#, r#"div::after { content: "<!--";}"#),
+];
+
+#[test]
+fn encode_style_double_quoted_text() {
+    for (expect, text) in STYLE_DOUBLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::encode_style_double_quoted_text(text));
+    }
+}
+
+#[test]
+fn decode_style_double_quoted_text() {
+    for (text, expect) in STYLE_DOUBLE_QUOTED_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_style_double_quoted_text(text));
     }
 }
 

@@ -290,12 +290,24 @@ encode_impl! {
     /// * `'` => `&#x27;`
     /// * `/` => `&#x2F;`
     escape_safe;
-    /// Encode text to prevent special characters functioning.
+    /// Encode `&`, `<`, `>`, `"`, `'`, and `/` as HTML entities.
+    ///
+    /// This function is not a context-independent sanitizer.
+    /// Use a context-specific encoder for text, attributes, scripts, and styles.
     encode_safe;
-    /// Encode text to prevent special characters functioning and write it to a mutable `String` reference and return the encoded string slice.
+    /// Encode `&`, `<`, `>`, `"`, `'`, and `/` as HTML entities, write the result to a mutable `String` reference, and return the encoded string slice.
+    ///
+    /// This function is not a context-independent sanitizer.
+    /// Use a context-specific encoder for text, attributes, scripts, and styles.
     encode_safe_to_string;
-    /// Encode text to prevent special characters functioning and write it to a mutable `Vec<u8>` reference and return the encoded data slice.
+    /// Encode `&`, `<`, `>`, `"`, `'`, and `/` as HTML entities, write the result to a mutable `Vec<u8>` reference, and return the encoded data slice.
+    ///
+    /// This function is not a context-independent sanitizer.
+    /// Use a context-specific encoder for text, attributes, scripts, and styles.
     encode_safe_to_vec;
-    /// Encode text to prevent special characters functioning and write it to a writer.
+    /// Encode `&`, `<`, `>`, `"`, `'`, and `/` as HTML entities and write the result to a writer.
+    ///
+    /// This function is not a context-independent sanitizer.
+    /// Use a context-specific encoder for text, attributes, scripts, and styles.
     encode_safe_to_writer;
 }

@@ -9,6 +9,10 @@ This library is for encoding/escaping special characters in HTML and decoding/un
 
 This crate provides some `encode_*` functions to encode HTML text in different situations.
 
+Escaping is context-sensitive.
+Use `encode_text` for text, quoted attribute encoders for quoted attributes, `encode_unquoted_attribute` for unquoted attributes, and script or style encoders for raw-text elements.
+`encode_safe` is not a context-independent sanitizer.
+
 For example, to put a text between a start tag `<foo>` and an end tag `</foo>`, use the `encode_text` function to escape every `&`, `<`, and `>` in the text.
 
 ```rust
@@ -30,6 +34,9 @@ assert_eq!("<input value=Hello&#x20;world&#x21; placeholder=\"The default value 
 ```
 
 ### Decoding
+
+Decoding accepts exact named and numeric character references ending with `;`.
+It does not apply legacy semicolonless references or C1 control replacements used by browser tokenizers.
 
 ```rust
 assert_eq!("Hello world!", html_escape::decode_html_entities("Hello&#x20;world&#x21;"));
