@@ -133,9 +133,9 @@ decode_impl! {
     parse_style;
     /// Decode text from the `<style>` element.
     decode_style;
-    /// Write text from the `<style>` element to a mutable `String` reference and return the encoded string slice.
+    /// Write text from the `<style>` element to a mutable `String` reference and return the decoded string slice.
     decode_style_to_string;
-    /// Write text from the `<style>` element to a mutable `Vec<u8>` reference and return the encoded data slice.
+    /// Write text from the `<style>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
     decode_style_to_vec;
     /// Write text from the `<style>` element to a writer.
     decode_style_to_writer;
@@ -150,9 +150,9 @@ decode_impl! {
     parse_style_single_quoted_text;
     /// Decode text from a single quoted text in the `<style>` element.
     decode_style_single_quoted_text;
-    /// Write text from a single quoted text in the `<style>` element to a mutable `String` reference and return the encoded string slice.
+    /// Write text from a single quoted text in the `<style>` element to a mutable `String` reference and return the decoded string slice.
     decode_style_single_quoted_text_to_string;
-    /// Write text from a single quoted text in the `<style>` element to a mutable `Vec<u8>` reference and return the encoded data slice.
+    /// Write text from a single quoted text in the `<style>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
     decode_style_single_quoted_text_to_vec;
     /// Write text from a single quoted text in the `<style>` element to a writer.
     decode_style_single_quoted_text_to_writer;
@@ -167,9 +167,9 @@ decode_impl! {
     parse_style_double_quoted_text;
     /// Decode text from a double quoted text in the `<style>` element.
     decode_style_double_quoted_text;
-    /// Write text from a double quoted text in the `<style>` element to a mutable `String` reference and return the encoded string slice.
+    /// Write text from a double quoted text in the `<style>` element to a mutable `String` reference and return the decoded string slice.
     decode_style_double_quoted_text_to_string;
-    /// Write text from a double quoted text in the `<style>` element to a mutable `Vec<u8>` reference and return the encoded data slice.
+    /// Write text from a double quoted text in the `<style>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
     decode_style_double_quoted_text_to_vec;
     /// Write text from a double quoted text in the `<style>` element to a writer.
     decode_style_double_quoted_text_to_writer;
@@ -185,9 +185,9 @@ decode_impl! {
     parse_style_quoted_text;
     /// Decode text from a quoted text in the `<style>` element.
     decode_style_quoted_text;
-    /// Write text from a quoted text in the `<style>` element to a mutable `String` reference and return the encoded string slice.
+    /// Write text from a quoted text in the `<style>` element to a mutable `String` reference and return the decoded string slice.
     decode_style_quoted_text_to_string;
-    /// Write text from a quoted text in the `<style>` element to a mutable `Vec<u8>` reference and return the encoded data slice.
+    /// Write text from a quoted text in the `<style>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
     decode_style_quoted_text_to_vec;
     /// Write text from a quoted text in the `<style>` element to a writer.
     decode_style_quoted_text_to_writer;

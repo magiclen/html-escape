@@ -140,9 +140,9 @@ decode_impl! {
     parse_script;
     /// Decode text from the `<script>` element.
     decode_script;
-    /// Write text from the `<script>` element to a mutable `String` reference and return the encoded string slice.
+    /// Write text from the `<script>` element to a mutable `String` reference and return the decoded string slice.
     decode_script_to_string;
-    /// Write text from the `<script>` element to a mutable `Vec<u8>` reference and return the encoded data slice.
+    /// Write text from the `<script>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
     decode_script_to_vec;
     /// Write text from the `<script>` element to a writer.
     decode_script_to_writer;
@@ -157,9 +157,9 @@ decode_impl! {
     parse_script_single_quoted_text;
     /// Decode text from a single quoted text in the `<script>` element.
     decode_script_single_quoted_text;
-    /// Write text from a single quoted text in the `<script>` element to a mutable `String` reference and return the encoded string slice.
+    /// Write text from a single quoted text in the `<script>` element to a mutable `String` reference and return the decoded string slice.
     decode_script_single_quoted_text_to_string;
-    /// Write text from a single quoted text in the `<script>` element to a mutable `Vec<u8>` reference and return the encoded data slice.
+    /// Write text from a single quoted text in the `<script>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
     decode_script_single_quoted_text_to_vec;
     /// Write text from a single quoted text in the `<script>` element to a writer.
     decode_script_single_quoted_text_to_writer;
@@ -174,9 +174,9 @@ decode_impl! {
     parse_script_double_quoted_text;
     /// Decode text from a double quoted text in the `<script>` element.
     decode_script_double_quoted_text;
-    /// Write text from a double quoted text in the `<script>` element to a mutable `String` reference and return the encoded string slice.
+    /// Write text from a double quoted text in the `<script>` element to a mutable `String` reference and return the decoded string slice.
     decode_script_double_quoted_text_to_string;
-    /// Write text from a double quoted text in the `<script>` element to a mutable `Vec<u8>` reference and return the encoded data slice.
+    /// Write text from a double quoted text in the `<script>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
     decode_script_double_quoted_text_to_vec;
     /// Write text from a double quoted text in the `<script>` element to a writer.
     decode_script_double_quoted_text_to_writer;
@@ -192,9 +192,9 @@ decode_impl! {
     parse_script_quoted_text;
     /// Decode text from a quoted text in the `<script>` element.
     decode_script_quoted_text;
-    /// Write text from a quoted text in the `<script>` element to a mutable `String` reference and return the encoded string slice.
+    /// Write text from a quoted text in the `<script>` element to a mutable `String` reference and return the decoded string slice.
     decode_script_quoted_text_to_string;
-    /// Write text from a quoted text in the `<script>` element to a mutable `Vec<u8>` reference and return the encoded data slice.
+    /// Write text from a quoted text in the `<script>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
     decode_script_quoted_text_to_vec;
     /// Write text from a quoted text in the `<script>` element to a writer.
     decode_script_quoted_text_to_writer;

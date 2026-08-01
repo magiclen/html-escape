@@ -38,7 +38,7 @@ assert_eq!("Hello world!", html_escape::decode_html_entities("Hello&#x20;world&#
 ```
 
 ```rust
-assert_eq!("alert('<script></script>);'", html_escape::decode_script(r"alert('<script><\/script>);'"));
+assert_eq!("alert('<script></script>');", html_escape::decode_script(r"alert('<script><\/script>');"));
 ```
 
 ## No Std
