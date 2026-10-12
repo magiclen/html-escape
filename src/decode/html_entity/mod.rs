@@ -24,6 +24,21 @@ struct DecodedEntity {
 
 #[inline]
 fn decode_named_entity(name: &[u8]) -> Option<DecodedEntityValue> {
+    // Check the most common names before the binary search.
+    let common = match name {
+        b"amp" => Some("&"),
+        b"lt" => Some("<"),
+        b"gt" => Some(">"),
+        b"quot" => Some("\""),
+        b"apos" => Some("'"),
+        b"nbsp" => Some("\u{00A0}"),
+        _ => None,
+    };
+
+    if let Some(value) = common {
+        return Some(DecodedEntityValue::Named(value));
+    }
+
     NAMED_ENTITIES
         .binary_search_by(|(t_name, _)| t_name.cmp(&name))
         .ok()
@@ -78,11 +93,11 @@ fn find_decoded_entity(text: &str, start: usize) -> Option<DecodedEntity> {
 
     let mut p = start;
 
-    'search: while p < text_length {
-        if text_bytes[p] != b'&' {
-            p += 1;
+    'search: loop {
+        p = find_byte(text_bytes, p, b'&');
 
-            continue;
+        if p == text_length {
+            return None;
         }
 
         let entity_start = p;
@@ -219,8 +234,6 @@ fn find_decoded_entity(text: &str, start: usize) -> Option<DecodedEntity> {
             },
         }
     }
-
-    None
 }
 
 #[inline]

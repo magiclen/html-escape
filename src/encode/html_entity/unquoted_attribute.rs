@@ -39,7 +39,7 @@ pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, st
         p += 1;
     }
 
-    let mut v = Vec::with_capacity(text_length);
+    let mut v = Vec::with_capacity(text_length + 5);
 
     v.extend_from_slice(&text_bytes[..p]);
 

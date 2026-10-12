@@ -4,14 +4,41 @@ use std::io::{self, Write};
 
 pub(crate) const HEX_DIGITS: [u8; 16] = *b"0123456789ABCDEF";
 
-/// Find the next `<` from `p`, or return the length of `text_bytes` if there is none.
+/// Find the next `byte` from `p`, or return the length of `text_bytes` if there is none.
 #[inline]
-pub(crate) fn find_less_than(text_bytes: &[u8], mut p: usize) -> usize {
-    while p < text_bytes.len() && text_bytes[p] != b'<' {
+pub(crate) fn find_byte(text_bytes: &[u8], mut p: usize, byte: u8) -> usize {
+    const LO: u64 = 0x0101_0101_0101_0101;
+    const HI: u64 = 0x8080_8080_8080_8080;
+
+    // The target is often the current byte in dense text, so check it before the 8-byte loop.
+    if p < text_bytes.len() && text_bytes[p] == byte {
+        return p;
+    }
+
+    let pattern = LO * byte as u64;
+
+    while p + 8 <= text_bytes.len() {
+        let x = u64::from_ne_bytes(text_bytes[p..(p + 8)].try_into().unwrap()) ^ pattern;
+
+        // This is non-zero only if a byte of `x` is zero, which means one of the 8 bytes is `byte`.
+        if x.wrapping_sub(LO) & !x & HI != 0 {
+            break;
+        }
+
+        p += 8;
+    }
+
+    while p < text_bytes.len() && text_bytes[p] != byte {
         p += 1;
     }
 
     p
+}
+
+/// Find the next `<` from `p`, or return the length of `text_bytes` if there is none.
+#[inline]
+pub(crate) fn find_less_than(text_bytes: &[u8], p: usize) -> usize {
+    find_byte(text_bytes, p, b'<')
 }
 
 #[inline]

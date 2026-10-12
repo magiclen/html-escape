@@ -86,6 +86,8 @@ decode_impl! {
     /// * `<\!--` => `<!--`
     ///
     /// `<\/style` at the end of the text is also unescaped.
+    /// This only removes the listed escapes and does not parse CSS.
+    /// Existing escapes in the original text may also be removed, so encoding and decoding may not return the original text.
     parse_style;
     /// Decode text from the `<style>` element.
     decode_style;

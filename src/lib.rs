@@ -13,6 +13,12 @@ Escaping is context-sensitive.
 Use `encode_text` for text, quoted attribute encoders for quoted attributes, `encode_unquoted_attribute` for unquoted attributes, and script or style encoders for raw-text elements.
 `encode_safe` is not a context-independent sanitizer.
 
+For example, to put a text between a start tag `<foo>` and an end tag `</foo>`, use the `encode_text` function to escape every `&`, `<`, and `>` in the text.
+
+```rust
+assert_eq!("a &gt; b &amp;&amp; a &lt; c", html_escape::encode_text("a > b && a < c"));
+```
+
 The script and style `*_quoted_text` functions take raw string content and do not add outer quotes.
 They escape every backslash, including those in existing escape sequences, and also C0 control characters and every `<`.
 Script variants also escape U+2028 and U+2029.
@@ -20,14 +26,30 @@ Style variants replace NUL with U+FFFD, so an input containing NUL cannot round-
 Use these functions for single-quoted or double-quoted string content inside `<script>` or `<style>`.
 
 Since 0.3.0, the `*_quoted_text` encoders escape every input backslash.
-Pass the original text and remove manual string escaping at the call site.
+Pass the original text and remove manual string escaping at the call site; for example, pass `C:\temp\file` instead of `C:\\temp\\file`.
 Their decoders also decode escaped backslashes and hex escapes.
 They still recognize legacy tag and comment escapes, but some decoding results differ from 0.2.
 
-For example, to put a text between a start tag `<foo>` and an end tag `</foo>`, use the `encode_text` function to escape every `&`, `<`, and `>` in the text.
+```rust
+let text = r"C:\temp\file";
+assert_eq!(r"C:\\temp\\file", html_escape::encode_script_single_quoted_text(text));
+assert_eq!(text, html_escape::decode_script_single_quoted_text(r"C:\\temp\\file"));
+assert_eq!("\n", html_escape::decode_script_single_quoted_text(r"\x0A"));
+assert_eq!(r"\x0A", html_escape::decode_script_single_quoted_text(r"\\x0A"));
+```
+
+`encode_script` and `encode_style` scan the whole element text without parsing JavaScript or CSS.
+They insert backslashes before tag and comment sequences, so check that the result is valid in the target language.
+They keep existing escapes, so encoding and decoding may not return the original text.
+For example, `<\/script>` stays the same during script encoding, but script decoding changes it to `</script>`.
+`encode_script` is not a JSON encoder; its `\!` escape for `<!--` is not valid JSON.
+To put JSON inside `<script type="application/json">`, serialize the data as JSON first, then replace each literal `<` with `\u003C` in the JSON text.
 
 ```rust
-assert_eq!("a &gt; b &amp;&amp; a &lt; c", html_escape::encode_text("a > b && a < c"));
+let json = r#"{"text":"<!--</script>"}"#;
+let escaped_json = json.replace('<', r"\u003C");
+let html = format!(r#"<script type="application/json">{}</script>"#, escaped_json);
+assert_eq!(r#"<script type="application/json">{"text":"\u003C!--\u003C/script>"}</script>"#, html);
 ```
 
 The functions suffixed with `_to_writer`, `_to_vec` or `_to_string` are useful to generate HTML.

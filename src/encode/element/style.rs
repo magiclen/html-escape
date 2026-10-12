@@ -82,6 +82,9 @@ encode_impl! {
     ///
     /// `</style` at the end of the text is also escaped, because the text after it can end the element.
     /// Pass the whole element text in one call; separate calls do not share parsing state.
+    /// This scans text without parsing CSS and may change its meaning.
+    /// Existing escapes are kept, so encoding and decoding may not return the original text.
+    /// Use a quoted text encoder when inserting raw text into a CSS string.
     parse_style_comment;
     /// Encode text used in the `<style>` element.
     encode_style;

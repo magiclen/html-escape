@@ -368,6 +368,39 @@ fn decode_html_entities_decodes_ascii_whitespace() {
     }
 }
 
+const UNICODE_NUMERIC_ENTITY_CASES: [(&str, &str); 5] = [
+    ("中", "&#20013;"),
+    ("文", "&#x6587;"),
+    ("🙂", "&#128578;"),
+    ("🙂", "&#X1F642;"),
+    ("中文A文🙂結尾", "中文&#65;&#x6587;&#128578;結尾"),
+];
+
+#[test]
+fn decode_html_entities_decodes_unicode_numeric_entities() {
+    for (expect, text) in UNICODE_NUMERIC_ENTITY_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities(text));
+    }
+}
+
+#[test]
+fn decode_html_entities_decodes_unicode_numeric_entities_to_string() {
+    for (expect, text) in UNICODE_NUMERIC_ENTITY_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities_to_string(text, &mut String::new()));
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn decode_html_entities_decodes_unicode_numeric_entities_to_writer() {
+    for (expect, text) in UNICODE_NUMERIC_ENTITY_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::decode_html_entities_to_writer(text, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
 const MULTI_CODEPOINT_CASES: [(&str, &str); 5] = [
     ("fj", "&fjlig;"),
     ("\u{2242}\u{0338}", "&NotEqualTilde;"),
@@ -401,6 +434,15 @@ fn decode_html_entities_decodes_multi_codepoint_entities_to_writer() {
         html_escape::decode_html_entities_to_writer(text, &mut v).unwrap();
 
         assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
+const COMMON_NAMED_ENTITY_CASES: [(&str, &str); 2] = [("'", "&apos;"), ("\u{00A0}", "&nbsp;")];
+
+#[test]
+fn decode_html_entities_decodes_common_named_entities() {
+    for (expect, text) in COMMON_NAMED_ENTITY_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities(text));
     }
 }
 

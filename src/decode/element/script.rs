@@ -91,6 +91,8 @@ decode_impl! {
     /// * `<\!--` => `<!--`
     ///
     /// `<\/script` at the end of the text is also unescaped.
+    /// This only removes the listed escapes and does not parse JavaScript.
+    /// Existing escapes in the original text may also be removed, so encoding and decoding may not return the original text.
     parse_script;
     /// Decode text from the `<script>` element.
     decode_script;

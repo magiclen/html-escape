@@ -129,12 +129,14 @@ benchmark_impl!(
     encode_style_quoted_text_to_writer
 );
 
+const CLEAN_TEXT: &str = "ordinary text 0123456789 ";
+
 macro_rules! scenario_benchmarks {
-    ($group:ident, $module:ident, $encode:ident, $to_string:ident, $special:expr) => {
+    ($group:ident, $module:ident, $encode:ident, $to_string:ident, $clean:expr, $special:expr) => {
         mod $module {
             use super::*;
 
-            const CLEAN: &str = "ordinary text 0123456789 ";
+            const CLEAN: &str = $clean;
 
             fn measure(bencher: &mut Bencher, text: String) {
                 bencher.bytes = text.len() as u64;
@@ -195,13 +197,23 @@ scenario_benchmarks!(
     text_cases,
     encode_text,
     encode_text_to_string,
+    CLEAN_TEXT,
     "<tag>&text</tag>"
+);
+scenario_benchmarks!(
+    unquoted_attribute_scenarios,
+    unquoted_attribute_cases,
+    encode_unquoted_attribute,
+    encode_unquoted_attribute_to_string,
+    "Abc0123456789",
+    " "
 );
 scenario_benchmarks!(
     script_scenarios,
     script_cases,
     encode_script,
     encode_script_to_string,
+    CLEAN_TEXT,
     "</script><!--"
 );
 scenario_benchmarks!(
@@ -209,6 +221,7 @@ scenario_benchmarks!(
     style_cases,
     encode_style,
     encode_style_to_string,
+    CLEAN_TEXT,
     "</style><!--"
 );
 scenario_benchmarks!(
@@ -216,6 +229,7 @@ scenario_benchmarks!(
     script_quoted_cases,
     encode_script_quoted_text,
     encode_script_quoted_text_to_string,
+    CLEAN_TEXT,
     "</script>\"'\\\n\u{2028}"
 );
 scenario_benchmarks!(
@@ -223,6 +237,7 @@ scenario_benchmarks!(
     style_quoted_cases,
     encode_style_quoted_text,
     encode_style_quoted_text_to_string,
+    CLEAN_TEXT,
     "</style>\"'\\\n\0"
 );
 
@@ -243,6 +258,7 @@ benchmark_main!(
     style_double_quoted_text,
     style_quoted_text,
     text_scenarios,
+    unquoted_attribute_scenarios,
     script_scenarios,
     style_scenarios,
     script_quoted_scenarios,
