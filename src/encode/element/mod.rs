@@ -1,5 +1,6 @@
 #[macro_use]
 mod encode_impl;
+mod quoted;
 
 mod script;
 mod style;

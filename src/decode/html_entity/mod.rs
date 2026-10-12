@@ -233,7 +233,7 @@ fn write_decoded_entity_to_vec(value: DecodedEntityValue, output: &mut Vec<u8>) 
 
 #[cfg(feature = "std")]
 #[inline]
-fn write_decoded_entity_to_writer<W: Write>(
+fn write_decoded_entity_to_writer<W: Write + ?Sized>(
     value: DecodedEntityValue,
     output: &mut W,
 ) -> Result<(), io::Error> {
@@ -272,6 +272,8 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
 
 /// Decode HTML entities in a given string to a mutable `String` reference and return the decoded string slice.
 ///
+/// This appends to `output` and returns only the new string slice.
+///
 /// Only exact named and numeric character references ending with `;` are decoded.
 /// Invalid Unicode scalar values, null, and C0 controls other than ASCII whitespace are left unchanged.
 /// This function does not implement legacy semicolonless references or C1 control replacements.
@@ -281,6 +283,8 @@ pub fn decode_html_entities_to_string<S: AsRef<str>>(text: S, output: &mut Strin
 }
 
 /// Decode HTML entities in a given string to a mutable `Vec<u8>` reference and return the decoded data slice.
+///
+/// This appends to `output` and returns only the new data slice.
 ///
 /// Only exact named and numeric character references ending with `;` are decoded.
 /// Invalid Unicode scalar values, null, and C0 controls other than ASCII whitespace are left unchanged.
@@ -313,7 +317,7 @@ pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>)
 /// Only exact named and numeric character references ending with `;` are decoded.
 /// Invalid Unicode scalar values, null, and C0 controls other than ASCII whitespace are left unchanged.
 /// This function does not implement legacy semicolonless references or C1 control replacements.
-pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write>(
+pub fn decode_html_entities_to_writer<S: AsRef<str>, W: Write + ?Sized>(
     text: S,
     output: &mut W,
 ) -> Result<(), io::Error> {

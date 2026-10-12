@@ -26,6 +26,11 @@ name = "encode"
 required-features = ["std"]
 harness = false
 
+[[bench]]
+name = "decode"
+required-features = ["std"]
+harness = false
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]

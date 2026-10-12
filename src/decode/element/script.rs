@@ -4,142 +4,82 @@ use core::str::from_utf8_unchecked;
 use std::io::{self, Write};
 
 macro_rules! parse_script {
-    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block $(, $($addi:expr),+)?) => {
-        match $step {
-            0 => {
-                match $e {
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => (),
-                }
-            }
-            1 => {
-                match $e {
-                    b'\\' => $step = 2,
-                    b'<' => $step = 1,
-                    _ => $step = 0,
-                }
-            }
-            2 => {
-                match $e {
-                    b'/' => $step = 3,
-                    b'!' => $step = 10,
-                    b'<' => $step = 1,
-                    $($(| $addi)+ => {
-                        $step = 0;
-                        $bq
-                    },)?
-                    _ => $step = 0,
-                }
-            }
-            3 => {
-                match $e {
-                    b's' | b'S' => $step = 4,
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => $step = 0,
-                }
-            }
-            4 => {
-                match $e {
-                    b'c' | b'C' => $step = 5,
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => $step = 0,
-                }
-            }
-            5 => {
-                match $e {
-                    b'r' | b'R' => $step = 6,
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => $step = 0,
-                }
-            }
-            6 => {
-                match $e {
-                    b'i' | b'I' => $step = 7,
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => $step = 0,
-                }
-            }
-            7 => {
-                match $e {
-                    b'p' | b'P' => $step = 8,
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => $step = 0,
-                }
-            }
-            8 => {
-                match $e {
-                    b't' | b'T' => $step = 9,
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => $step = 0,
-                }
-            }
-            9 => {
-                match $e {
-                    b'/' | b'>' | 9..=13 | 28..=32 => {
-                        $step = 0;
-                        $b
-                    },
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => $step = 0,
-                }
-            }
-            10 => {
-                match $e {
-                    b'-' => $step = 11,
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => $step = 0,
-                }
-            }
-            11 => {
-                match $e {
-                    b'-' => {
-                        $step = 0;
-                        $bc
-                    },
-                    b'<' => $step = 1,
-                    b'\\' => $step = 100,
-                    _ => $step = 0,
-                }
-            }
-            100 => {
-                match $e {
-                    b'<' => $step = 1,
-                     $($(| $addi)+ => {
-                        $step = 0;
-                        $bq
-                    },)?
-                    _ => $step = 0,
-                }
-            }
-            _ => unreachable!(),
+    (@eof $step:ident, $b:block) => {
+        // The text ends right after `<\/script`.
+        if $step == 9 {
+            $b
         }
     };
-}
-
-macro_rules! parse_script_single_quoted_text {
-    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block) => {
-        parse_script!($e, $step, $b, $bq, $bc, b'\'');
-    };
-}
-
-macro_rules! parse_script_double_quoted_text {
-    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block) => {
-        parse_script!($e, $step, $b, $bq, $bc, b'"');
-    };
-}
-
-macro_rules! parse_script_quoted_text {
-    ($e:expr, $step:ident, $b:block, $bq:block, $bc:block) => {
-        parse_script!($e, $step, $b, $bq, $bc, b'\'', b'"');
+    ($e:expr, $step:ident, $b:block, $bc:block) => {
+        match $step {
+            0 => match $e {
+                b'<' => $step = 1,
+                _ => (),
+            },
+            1 => match $e {
+                b'\\' => $step = 2,
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            2 => match $e {
+                b'/' => $step = 3,
+                b'!' => $step = 10,
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            3 => match $e {
+                b's' | b'S' => $step = 4,
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            4 => match $e {
+                b'c' | b'C' => $step = 5,
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            5 => match $e {
+                b'r' | b'R' => $step = 6,
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            6 => match $e {
+                b'i' | b'I' => $step = 7,
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            7 => match $e {
+                b'p' | b'P' => $step = 8,
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            8 => match $e {
+                b't' | b'T' => $step = 9,
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            9 => match $e {
+                b'/' | b'>' | 9..=13 | 28..=32 => {
+                    $step = 0;
+                    $b
+                },
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            10 => match $e {
+                b'-' => $step = 11,
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            11 => match $e {
+                b'-' => {
+                    $step = 0;
+                    $bc
+                },
+                b'<' => $step = 1,
+                _ => $step = 0,
+            },
+            _ => unreachable!(),
+        }
     };
 }
 
@@ -148,6 +88,9 @@ decode_impl! {
     /// The following substring is unescaped:
     ///
     /// * `<\/script>` => `</script>`
+    /// * `<\!--` => `<!--`
+    ///
+    /// `<\/script` at the end of the text is also unescaped.
     parse_script;
     /// Decode text from the `<script>` element.
     decode_script;
@@ -160,53 +103,58 @@ decode_impl! {
 }
 
 decode_impl! {
-    7;
-    /// The following substring and character is unescaped:
-    ///
-    /// * `<\/script>` => `</script>`
-    /// * `\'` => `'`
-    parse_script_single_quoted_text;
-    /// Decode text from a single quoted text in the `<script>` element.
+    quoted false, true, false;
+    /// Escapes emitted by the matching encoder are decoded.
+    /// Hex escapes use `\xHH` with uppercase digits; only escaped C0 controls and `<` are decoded.
+    /// `\u2028` and `\u2029` are also decoded.
+    /// Backslashes and `'` escaped with a backslash are decoded.
+    /// Legacy `<\/script>` and `<\!--` escapes are also decoded.
+    /// Unknown or incomplete escapes are kept, and decoded text is not decoded again.
+    raw_text;
+    /// Decode content of a single-quoted JavaScript string from `<script>`.
     decode_script_single_quoted_text;
-    /// Write text from a single quoted text in the `<script>` element to a mutable `String` reference and return the decoded string slice.
+    /// Decode content of a single-quoted JavaScript string to a mutable `String` and return the new string slice.
     decode_script_single_quoted_text_to_string;
-    /// Write text from a single quoted text in the `<script>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
+    /// Decode content of a single-quoted JavaScript string to a mutable `Vec<u8>` and return the new data slice.
     decode_script_single_quoted_text_to_vec;
-    /// Write text from a single quoted text in the `<script>` element to a writer.
+    /// Decode content of a single-quoted JavaScript string to a writer.
     decode_script_single_quoted_text_to_writer;
 }
 
 decode_impl! {
-    7;
-    /// The following substring and character are unescaped:
-    ///
-    /// * `<\/script>` => `</script>`
-    /// * `\"` => `"`
-    parse_script_double_quoted_text;
-    /// Decode text from a double quoted text in the `<script>` element.
+    quoted false, false, true;
+    /// Escapes emitted by the matching encoder are decoded.
+    /// Hex escapes use `\xHH` with uppercase digits; only escaped C0 controls and `<` are decoded.
+    /// `\u2028` and `\u2029` are also decoded.
+    /// Backslashes and `"` escaped with a backslash are decoded.
+    /// Legacy `<\/script>` and `<\!--` escapes are also decoded.
+    /// Unknown or incomplete escapes are kept, and decoded text is not decoded again.
+    raw_text;
+    /// Decode content of a double-quoted JavaScript string from `<script>`.
     decode_script_double_quoted_text;
-    /// Write text from a double quoted text in the `<script>` element to a mutable `String` reference and return the decoded string slice.
+    /// Decode content of a double-quoted JavaScript string to a mutable `String` and return the new string slice.
     decode_script_double_quoted_text_to_string;
-    /// Write text from a double quoted text in the `<script>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
+    /// Decode content of a double-quoted JavaScript string to a mutable `Vec<u8>` and return the new data slice.
     decode_script_double_quoted_text_to_vec;
-    /// Write text from a double quoted text in the `<script>` element to a writer.
+    /// Decode content of a double-quoted JavaScript string to a writer.
     decode_script_double_quoted_text_to_writer;
 }
 
 decode_impl! {
-    7;
-    /// The following substring and characters are unescaped:
-    ///
-    /// * `<\/script>` => `</script>`
-    /// * `\"` => `"`
-    /// * `\'` => `'`
-    parse_script_quoted_text;
-    /// Decode text from a quoted text in the `<script>` element.
+    quoted false, true, true;
+    /// Escapes emitted by the matching encoder are decoded.
+    /// Hex escapes use `\xHH` with uppercase digits; only escaped C0 controls and `<` are decoded.
+    /// `\u2028` and `\u2029` are also decoded.
+    /// Backslashes, `'`, and `"` escaped with a backslash are decoded.
+    /// Legacy `<\/script>` and `<\!--` escapes are also decoded.
+    /// Unknown or incomplete escapes are kept, and decoded text is not decoded again.
+    raw_text;
+    /// Decode content of a single-quoted or double-quoted JavaScript string from `<script>`.
     decode_script_quoted_text;
-    /// Write text from a quoted text in the `<script>` element to a mutable `String` reference and return the decoded string slice.
+    /// Decode content of a single-quoted or double-quoted JavaScript string to a mutable `String` and return the new string slice.
     decode_script_quoted_text_to_string;
-    /// Write text from a quoted text in the `<script>` element to a mutable `Vec<u8>` reference and return the decoded data slice.
+    /// Decode content of a single-quoted or double-quoted JavaScript string to a mutable `Vec<u8>` and return the new data slice.
     decode_script_quoted_text_to_vec;
-    /// Write text from a quoted text in the `<script>` element to a writer.
+    /// Decode content of a single-quoted or double-quoted JavaScript string to a writer.
     decode_script_quoted_text_to_writer;
 }

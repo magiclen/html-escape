@@ -15,6 +15,7 @@ use crate::functions::*;
 /// * `"` => `&quot;`
 ///
 /// Other non-alphanumeric characters are escaped to `&#xHH;`.
+/// Use a quoted attribute for an empty value; this function does not add quotes.
 pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
     let text = text.as_ref();
     let text_bytes = text.as_bytes();
@@ -56,6 +57,9 @@ pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, st
 
 /// Write text used in an unquoted attribute to a mutable `String` reference and return the encoded string slice. Except for alphanumeric characters, escape all characters which are less than 128.
 ///
+/// This appends to `output` and returns only the new string slice.
+/// Use a quoted attribute for an empty value; this function does not add quotes.
+///
 /// The following characters are escaped to named entities:
 ///
 /// * `&` => `&amp;`
@@ -71,6 +75,9 @@ pub fn encode_unquoted_attribute_to_string<S: AsRef<str>>(text: S, output: &mut 
 }
 
 /// Write text used in an unquoted attribute to a mutable `Vec<u8>` reference and return the encoded data slice. Except for alphanumeric characters, escape all characters which are less than 128.
+///
+/// This appends to `output` and returns only the new data slice.
+/// Use a quoted attribute for an empty value; this function does not add quotes.
 ///
 /// The following characters are escaped to named entities:
 ///
@@ -114,6 +121,8 @@ pub fn encode_unquoted_attribute_to_vec<S: AsRef<str>>(text: S, output: &mut Vec
 #[cfg(feature = "std")]
 /// Write text used in an unquoted attribute to a writer. Except for alphanumeric characters, escape all characters which are less than 128.
 ///
+/// Use a quoted attribute for an empty value; this function does not add quotes.
+///
 /// The following characters are escaped to named entities:
 ///
 /// * `&` => `&amp;`
@@ -122,7 +131,7 @@ pub fn encode_unquoted_attribute_to_vec<S: AsRef<str>>(text: S, output: &mut Vec
 /// * `"` => `&quot;`
 ///
 /// Other non-alphanumeric characters are escaped to `&#xHH;`.
-pub fn encode_unquoted_attribute_to_writer<S: AsRef<str>, W: Write>(
+pub fn encode_unquoted_attribute_to_writer<S: AsRef<str>, W: Write + ?Sized>(
     text: S,
     output: &mut W,
 ) -> Result<(), io::Error> {

@@ -367,3 +367,51 @@ fn decode_html_entities_decodes_ascii_whitespace() {
         assert_eq!(expect, html_escape::decode_html_entities(text));
     }
 }
+
+const MULTI_CODEPOINT_CASES: [(&str, &str); 5] = [
+    ("fj", "&fjlig;"),
+    ("\u{2242}\u{0338}", "&NotEqualTilde;"),
+    ("\u{205F}\u{200A}", "&ThickSpace;"),
+    ("\u{226B}\u{20D2}", "&nGt;"),
+    (
+        "中文fj\u{2242}\u{0338}\u{205F}\u{200A}\u{226B}\u{20D2}結尾",
+        "中文&fjlig;&NotEqualTilde;&ThickSpace;&nGt;結尾",
+    ),
+];
+
+#[test]
+fn decode_html_entities_decodes_multi_codepoint_entities() {
+    for (expect, text) in MULTI_CODEPOINT_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities(text));
+    }
+}
+
+#[test]
+fn decode_html_entities_decodes_multi_codepoint_entities_to_string() {
+    for (expect, text) in MULTI_CODEPOINT_CASES.iter().copied() {
+        assert_eq!(expect, html_escape::decode_html_entities_to_string(text, &mut String::new()));
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn decode_html_entities_decodes_multi_codepoint_entities_to_writer() {
+    for (expect, text) in MULTI_CODEPOINT_CASES.iter().copied() {
+        let mut v = Vec::new();
+        html_escape::decode_html_entities_to_writer(text, &mut v).unwrap();
+
+        assert_eq!(expect.as_bytes(), v.as_slice());
+    }
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn encode_html_entities_to_dyn_writer() {
+    let mut bytes = b"prefix:".to_vec();
+    let writer: &mut dyn std::io::Write = &mut bytes;
+
+    html_escape::encode_text_to_writer("中文 & <tag>", writer).unwrap();
+    html_escape::encode_unquoted_attribute_to_writer(" a/b", writer).unwrap();
+
+    assert_eq!("prefix:中文 &amp; &lt;tag&gt;&#x20;a&#x2F;b".as_bytes(), bytes.as_slice());
+}

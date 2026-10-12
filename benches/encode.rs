@@ -1,6 +1,6 @@
 use std::fs;
 
-use bencher::{benchmark_group, benchmark_main, Bencher};
+use bencher::{benchmark_group, benchmark_main, black_box, Bencher};
 
 #[cfg(unix)]
 const TEXT_PATH: &str = "benches/data/vgilante.txt";
@@ -129,6 +129,103 @@ benchmark_impl!(
     encode_style_quoted_text_to_writer
 );
 
+macro_rules! scenario_benchmarks {
+    ($group:ident, $module:ident, $encode:ident, $to_string:ident, $special:expr) => {
+        mod $module {
+            use super::*;
+
+            const CLEAN: &str = "ordinary text 0123456789 ";
+
+            fn measure(bencher: &mut Bencher, text: String) {
+                bencher.bytes = text.len() as u64;
+                bencher.iter(|| html_escape::$encode(black_box(text.as_str())));
+            }
+
+            pub fn clean(bencher: &mut Bencher) {
+                measure(bencher, CLEAN.repeat(64));
+            }
+
+            pub fn sparse(bencher: &mut Bencher) {
+                measure(bencher, format!("{}{}{}", CLEAN.repeat(32), $special, CLEAN.repeat(32)));
+            }
+
+            pub fn dense(bencher: &mut Bencher) {
+                measure(bencher, $special.repeat(64));
+            }
+
+            pub fn unicode(bencher: &mut Bencher) {
+                measure(bencher, format!("中文🙂{}臺灣", $special).repeat(64));
+            }
+
+            pub fn dense_fresh_string(bencher: &mut Bencher) {
+                let text = $special.repeat(64);
+                bencher.bytes = text.len() as u64;
+                bencher.iter(|| {
+                    let mut output = String::new();
+                    html_escape::$to_string(black_box(text.as_str()), &mut output);
+                    output
+                });
+            }
+
+            pub fn dense_reused_string(bencher: &mut Bencher) {
+                let text = $special.repeat(64);
+                let mut output = html_escape::$encode(text.as_str()).into_owned();
+                bencher.bytes = text.len() as u64;
+                bencher.iter(|| {
+                    output.clear();
+                    black_box(html_escape::$to_string(black_box(text.as_str()), &mut output));
+                });
+            }
+        }
+
+        benchmark_group!(
+            $group,
+            $module::clean,
+            $module::sparse,
+            $module::dense,
+            $module::unicode,
+            $module::dense_fresh_string,
+            $module::dense_reused_string
+        );
+    };
+}
+
+scenario_benchmarks!(
+    text_scenarios,
+    text_cases,
+    encode_text,
+    encode_text_to_string,
+    "<tag>&text</tag>"
+);
+scenario_benchmarks!(
+    script_scenarios,
+    script_cases,
+    encode_script,
+    encode_script_to_string,
+    "</script><!--"
+);
+scenario_benchmarks!(
+    style_scenarios,
+    style_cases,
+    encode_style,
+    encode_style_to_string,
+    "</style><!--"
+);
+scenario_benchmarks!(
+    script_quoted_scenarios,
+    script_quoted_cases,
+    encode_script_quoted_text,
+    encode_script_quoted_text_to_string,
+    "</script>\"'\\\n\u{2028}"
+);
+scenario_benchmarks!(
+    style_quoted_scenarios,
+    style_quoted_cases,
+    encode_style_quoted_text,
+    encode_style_quoted_text_to_string,
+    "</style>\"'\\\n\0"
+);
+
 benchmark_main!(
     text_minimal,
     text,
@@ -145,4 +242,9 @@ benchmark_main!(
     style_single_quoted_text,
     style_double_quoted_text,
     style_quoted_text,
+    text_scenarios,
+    script_scenarios,
+    style_scenarios,
+    script_quoted_scenarios,
+    style_quoted_scenarios,
 );

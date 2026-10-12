@@ -139,6 +139,8 @@ macro_rules! encode_impl {
 
         $(#[$encode_to_string_attr])*
         ///
+        /// This appends to `output` and returns only the new string slice.
+        ///
         $(#[$attr])*
         #[inline]
         pub fn $encode_to_string_name<S: AsRef<str>>(text: S, output: &mut String) -> &str {
@@ -147,6 +149,8 @@ macro_rules! encode_impl {
         }
 
         $(#[$encode_to_vec_attr])*
+        ///
+        /// This appends to `output` and returns only the new data slice.
         ///
         $(#[$attr])*
         #[inline]
@@ -176,7 +180,7 @@ macro_rules! encode_impl {
         ///
         $(#[$attr])*
         #[inline]
-        pub fn $encode_to_writer_name<S: AsRef<str>, W: Write>(text: S, output: &mut W) -> Result<(), io::Error> {
+        pub fn $encode_to_writer_name<S: AsRef<str>, W: Write + ?Sized>(text: S, output: &mut W) -> Result<(), io::Error> {
             let text = text.as_ref();
             let text_bytes = text.as_bytes();
 

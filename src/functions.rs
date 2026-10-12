@@ -2,7 +2,17 @@ use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::io::{self, Write};
 
-const HEX_DIGITS: [u8; 16] = *b"0123456789ABCDEF";
+pub(crate) const HEX_DIGITS: [u8; 16] = *b"0123456789ABCDEF";
+
+/// Find the next `<` from `p`, or return the length of `text_bytes` if there is none.
+#[inline]
+pub(crate) fn find_less_than(text_bytes: &[u8], mut p: usize) -> usize {
+    while p < text_bytes.len() && text_bytes[p] != b'<' {
+        p += 1;
+    }
+
+    p
+}
 
 #[inline]
 pub(crate) fn write_hex_to_vec(e: u8, output: &mut Vec<u8>) {
@@ -28,7 +38,10 @@ pub(crate) fn write_hex_to_vec(e: u8, output: &mut Vec<u8>) {
 
 #[cfg(feature = "std")]
 #[inline]
-pub(crate) fn write_hex_to_writer<W: Write>(e: u8, output: &mut W) -> Result<(), io::Error> {
+pub(crate) fn write_hex_to_writer<W: Write + ?Sized>(
+    e: u8,
+    output: &mut W,
+) -> Result<(), io::Error> {
     let entity =
         [b'&', b'#', b'x', HEX_DIGITS[(e >> 4) as usize], HEX_DIGITS[(e & 0xF) as usize], b';'];
 
@@ -48,7 +61,7 @@ pub(crate) fn write_html_entity_to_vec(e: u8, output: &mut Vec<u8>) {
 
 #[cfg(feature = "std")]
 #[inline]
-pub(crate) fn write_html_entity_to_writer<W: Write>(
+pub(crate) fn write_html_entity_to_writer<W: Write + ?Sized>(
     e: u8,
     output: &mut W,
 ) -> Result<(), io::Error> {
@@ -75,7 +88,10 @@ pub(crate) fn write_char_to_vec(c: char, output: &mut Vec<u8>) {
 
 #[cfg(feature = "std")]
 #[inline]
-pub(crate) fn write_char_to_writer<W: Write>(c: char, output: &mut W) -> Result<(), io::Error> {
+pub(crate) fn write_char_to_writer<W: Write + ?Sized>(
+    c: char,
+    output: &mut W,
+) -> Result<(), io::Error> {
     let mut buffer = [0u8; 4];
     let length = c.encode_utf8(&mut buffer).len();
 
