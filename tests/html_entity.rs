@@ -257,8 +257,6 @@ fn decode_unquoted_attribute_to_writer() {
     }
 }
 
-// TODO ----------
-
 const BIG_NAMES_COMPATIBILITY_CASES: [(&str, &str); 4] =
     [("&", "&AMP;"), ("<", "&LT;"), (">", "&GT;"), ("\"", "&QUOT;")];
 
@@ -443,6 +441,23 @@ const COMMON_NAMED_ENTITY_CASES: [(&str, &str); 2] = [("'", "&apos;"), ("\u{00A0
 fn decode_html_entities_decodes_common_named_entities() {
     for (expect, text) in COMMON_NAMED_ENTITY_CASES.iter().copied() {
         assert_eq!(expect, html_escape::decode_html_entities(text));
+    }
+}
+
+#[test]
+fn named_entities_are_sorted_and_decodable() {
+    let entities = &html_escape::NAMED_ENTITIES;
+
+    assert!(
+        entities.windows(2).all(|pair| pair[0].0 < pair[1].0),
+        "Entity names must be sorted and unique"
+    );
+
+    for (name, expect) in entities.iter().copied() {
+        let name = core::str::from_utf8(name).unwrap();
+        let text = format!("&{name};");
+
+        assert_eq!(expect, html_escape::decode_html_entities(&text), "{text}");
     }
 }
 

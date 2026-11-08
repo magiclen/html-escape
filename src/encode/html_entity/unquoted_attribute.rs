@@ -7,6 +7,8 @@ use crate::functions::*;
 
 /// Encode text used in an unquoted attribute. Except for alphanumeric characters, escape all characters which are less than 128.
 ///
+/// Use a quoted attribute for an empty value; this function does not add quotes.
+///
 /// The following characters are escaped to named entities:
 ///
 /// * `&` => `&amp;`
@@ -15,7 +17,7 @@ use crate::functions::*;
 /// * `"` => `&quot;`
 ///
 /// Other non-alphanumeric characters are escaped to `&#xHH;`.
-/// Use a quoted attribute for an empty value; this function does not add quotes.
+/// [`decode_html_entities`](crate::decode_html_entities) does not decode the `&#xHH;` output for NUL and C0 controls other than ASCII whitespace, so such text cannot round-trip.
 pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
     let text = text.as_ref();
     let text_bytes = text.as_bytes();
@@ -68,6 +70,7 @@ pub fn encode_unquoted_attribute<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, st
 /// * `"` => `&quot;`
 ///
 /// Other non-alphanumeric characters are escaped to `&#xHH;`.
+/// [`decode_html_entities`](crate::decode_html_entities) does not decode the `&#xHH;` output for NUL and C0 controls other than ASCII whitespace, so such text cannot round-trip.
 #[inline]
 pub fn encode_unquoted_attribute_to_string<S: AsRef<str>>(text: S, output: &mut String) -> &str {
     // SAFETY: the encoded data is valid UTF-8, so `output` remains a valid `String`.
@@ -87,6 +90,7 @@ pub fn encode_unquoted_attribute_to_string<S: AsRef<str>>(text: S, output: &mut 
 /// * `"` => `&quot;`
 ///
 /// Other non-alphanumeric characters are escaped to `&#xHH;`.
+/// [`decode_html_entities`](crate::decode_html_entities) does not decode the `&#xHH;` output for NUL and C0 controls other than ASCII whitespace, so such text cannot round-trip.
 pub fn encode_unquoted_attribute_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u8] {
     let text = text.as_ref();
     let text_bytes = text.as_bytes();
@@ -131,6 +135,7 @@ pub fn encode_unquoted_attribute_to_vec<S: AsRef<str>>(text: S, output: &mut Vec
 /// * `"` => `&quot;`
 ///
 /// Other non-alphanumeric characters are escaped to `&#xHH;`.
+/// [`decode_html_entities`](crate::decode_html_entities) does not decode the `&#xHH;` output for NUL and C0 controls other than ASCII whitespace, so such text cannot round-trip.
 pub fn encode_unquoted_attribute_to_writer<S: AsRef<str>, W: Write + ?Sized>(
     text: S,
     output: &mut W,

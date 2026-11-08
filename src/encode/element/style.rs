@@ -80,6 +80,7 @@ encode_impl! {
     /// * `</style>` => `<\/style>`
     /// * `<!--` => `<\!--`
     ///
+    /// Use this encoder for `<style>` elements in the HTML namespace of a `text/html` document.
     /// `</style` at the end of the text is also escaped, because the text after it can end the element.
     /// Pass the whole element text in one call; separate calls do not share parsing state.
     /// This scans text without parsing CSS and may change its meaning.
@@ -104,7 +105,7 @@ encode_impl! {
     /// `<` and C0 controls other than NUL use two uppercase hex digits and one ending space, such as `\3C `.
     /// NUL is replaced with U+FFFD, so text containing NUL cannot round-trip without a change.
     /// The ending space is part of the escape; an input space after it is kept.
-    /// Use the output in a CSS string inside `<style>`, not in a CSS identifier or an HTML attribute.
+    /// Use the output only in a single-quoted CSS string inside `<style>` in the HTML namespace of a `text/html` document, not in a CSS identifier or an HTML attribute.
     raw_text;
     /// Encode raw text for a single-quoted CSS string inside `<style>`.
     encode_style_single_quoted_text;
@@ -124,7 +125,7 @@ encode_impl! {
     /// `<` and C0 controls other than NUL use two uppercase hex digits and one ending space, such as `\3C `.
     /// NUL is replaced with U+FFFD, so text containing NUL cannot round-trip without a change.
     /// The ending space is part of the escape; an input space after it is kept.
-    /// Use the output in a CSS string inside `<style>`, not in a CSS identifier or an HTML attribute.
+    /// Use the output only in a double-quoted CSS string inside `<style>` in the HTML namespace of a `text/html` document, not in a CSS identifier or an HTML attribute.
     raw_text;
     /// Encode raw text for a double-quoted CSS string inside `<style>`.
     encode_style_double_quoted_text;
@@ -144,7 +145,7 @@ encode_impl! {
     /// `<` and C0 controls other than NUL use two uppercase hex digits and one ending space, such as `\3C `.
     /// NUL is replaced with U+FFFD, so text containing NUL cannot round-trip without a change.
     /// The ending space is part of the escape; an input space after it is kept.
-    /// Use the output in a CSS string inside `<style>`, not in a CSS identifier or an HTML attribute.
+    /// Use the output only in a single-quoted or double-quoted CSS string inside `<style>` in the HTML namespace of a `text/html` document, not in a CSS identifier or an HTML attribute.
     raw_text;
     /// Encode raw text for a single-quoted or double-quoted CSS string inside `<style>`.
     encode_style_quoted_text;

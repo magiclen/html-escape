@@ -45,15 +45,13 @@ fn decode_named_entity(name: &[u8]) -> Option<DecodedEntityValue> {
         .map(|index| DecodedEntityValue::Named(NAMED_ENTITIES[index].1))
 }
 
-/// Turn the value of a numeric character reference into a character, rejecting the code points which cannot appear in an HTML document.
+/// Accept only Unicode scalar values and keep only ASCII whitespace in the C0 range.
 #[inline]
 fn decode_character(number: u32) -> Option<char> {
     let character = char::try_from(number).ok()?;
 
     match character {
-        // These are the ASCII whitespace characters, which are legitimate in an HTML document.
         '\t' | '\n' | '\u{000C}' | '\r' => Some(character),
-        // U+0000 and the other C0 control characters are not.
         '\0'..='\u{001F}' => None,
         _ => Some(character),
     }
@@ -256,6 +254,20 @@ fn write_decoded_entity_to_writer<W: Write + ?Sized>(
     }
 }
 
+#[inline]
+fn append_decoded_entities(text: &str, output: &mut Vec<u8>) {
+    let text_bytes = text.as_bytes();
+    let mut start = 0;
+
+    while let Some(entity) = find_decoded_entity(text, start) {
+        output.extend_from_slice(&text_bytes[start..entity.start]);
+        write_decoded_entity_to_vec(entity.value, output);
+        start = entity.end;
+    }
+
+    output.extend_from_slice(&text_bytes[start..]);
+}
+
 /// Decode HTML entities in a given string.
 ///
 /// Only exact named and numeric character references ending with `;` are decoded.
@@ -277,7 +289,7 @@ pub fn decode_html_entities<S: ?Sized + AsRef<str>>(text: &S) -> Cow<'_, str> {
     write_decoded_entity_to_vec(entity.value, &mut v);
 
     // `entity.end` is right after a `;`, so it is a UTF-8 boundary.
-    decode_html_entities_to_vec(&text[entity.end..], &mut v);
+    append_decoded_entities(&text[entity.end..], &mut v);
 
     // SAFETY: every decoded entity is a `char` or a `&str`, and every copied slice is bounded by ASCII bytes, so `v` is valid UTF-8.
     Cow::from(unsafe { String::from_utf8_unchecked(v) })
@@ -304,22 +316,12 @@ pub fn decode_html_entities_to_string<S: AsRef<str>>(text: S, output: &mut Strin
 /// This function does not implement legacy semicolonless references or C1 control replacements.
 pub fn decode_html_entities_to_vec<S: AsRef<str>>(text: S, output: &mut Vec<u8>) -> &[u8] {
     let text = text.as_ref();
-    let text_bytes = text.as_bytes();
-    let text_length = text_bytes.len();
 
-    output.reserve(text_length);
+    output.reserve(text.len());
 
     let current_length = output.len();
 
-    let mut start = 0;
-
-    while let Some(entity) = find_decoded_entity(text, start) {
-        output.extend_from_slice(&text_bytes[start..entity.start]);
-        write_decoded_entity_to_vec(entity.value, output);
-        start = entity.end;
-    }
-
-    output.extend_from_slice(&text_bytes[start..]);
+    append_decoded_entities(text, output);
 
     &output[current_length..]
 }

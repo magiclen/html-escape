@@ -266,7 +266,7 @@ encode_impl! {
 }
 
 encode_impl! {
-    /// The following characters (HTML reserved characters)  are escaped:
+    /// The following characters (HTML reserved characters) are escaped:
     ///
     /// * `&` => `&amp;`
     /// * `<` => `&lt;`

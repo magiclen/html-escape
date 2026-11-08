@@ -19,6 +19,9 @@ For example, to put a text between a start tag `<foo>` and an end tag `</foo>`, 
 assert_eq!("a &gt; b &amp;&amp; a &lt; c", html_escape::encode_text("a > b && a < c"));
 ```
 
+The script and style encoders are for `<script>` and `<style>` in the HTML namespace of a `text/html` document.
+Do not use them in inline SVG, where the parser decodes character references inside `<script>` and `<style>`, so `&apos;` can become a quote that ends a string.
+
 The script and style `*_quoted_text` functions take raw string content and do not add outer quotes.
 They escape every backslash, including those in existing escape sequences, and also C0 control characters and every `<`.
 Script variants also escape U+2028 and U+2029.

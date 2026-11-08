@@ -85,6 +85,7 @@ encode_impl! {
     /// * `</script>` => `<\/script>`
     /// * `<!--` => `<\!--`
     ///
+    /// Use this encoder for `<script>` elements in the HTML namespace of a `text/html` document.
     /// `</script` at the end of the text is also escaped, because the text after it can end the element.
     /// Pass the whole element text in one call; separate calls do not share parsing state.
     /// This scans text without parsing JavaScript and may change its meaning.
@@ -110,7 +111,7 @@ encode_impl! {
     /// Backslashes and `'` are escaped with a backslash.
     /// `<` and C0 controls use `\xHH` with uppercase hex digits.
     /// U+2028 and U+2029 use `\u2028` and `\u2029`.
-    /// Use the output in a JavaScript string inside `<script>`, not in a template literal or an HTML attribute.
+    /// Use the output only in a single-quoted JavaScript string inside `<script>` in the HTML namespace of a `text/html` document, not in a template literal or an HTML attribute.
     raw_text;
     /// Encode raw text for a single-quoted JavaScript string inside `<script>`.
     encode_script_single_quoted_text;
@@ -129,7 +130,7 @@ encode_impl! {
     /// Backslashes and `"` are escaped with a backslash.
     /// `<` and C0 controls use `\xHH` with uppercase hex digits.
     /// U+2028 and U+2029 use `\u2028` and `\u2029`.
-    /// Use the output in a JavaScript string inside `<script>`, not in a template literal or an HTML attribute.
+    /// Use the output only in a double-quoted JavaScript string inside `<script>` in the HTML namespace of a `text/html` document, not in a template literal or an HTML attribute.
     raw_text;
     /// Encode raw text for a double-quoted JavaScript string inside `<script>`.
     encode_script_double_quoted_text;
@@ -148,7 +149,7 @@ encode_impl! {
     /// Backslashes, `'`, and `"` are escaped with a backslash.
     /// `<` and C0 controls use `\xHH` with uppercase hex digits.
     /// U+2028 and U+2029 use `\u2028` and `\u2029`.
-    /// Use the output in a JavaScript string inside `<script>`, not in a template literal or an HTML attribute.
+    /// Use the output only in a single-quoted or double-quoted JavaScript string inside `<script>` in the HTML namespace of a `text/html` document, not in a template literal or an HTML attribute.
     raw_text;
     /// Encode raw text for a single-quoted or double-quoted JavaScript string inside `<script>`.
     encode_script_quoted_text;
